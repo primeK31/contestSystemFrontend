@@ -10,6 +10,7 @@ const RoomList = ({ onSelectRoom }) => {
   const [loadingContests, setLoadingContests] = useState(false);
   const [selectedContest, setSelectedContest] = useState('');
   const [contestJson, setContestJson] = useState([]);
+  const [rating, setRating] = useState([]);
 
 
   useEffect(() => {
@@ -19,6 +20,7 @@ const RoomList = ({ onSelectRoom }) => {
     };
     const fetchContests = async () => {
       const response = await axios.get('http://localhost:8000/contests/');
+      // const response = await axios.get('http://localhost:8000/supercontests/');
       console.log(response.data);
       setContests(response.data);
     };

@@ -1,24 +1,43 @@
-// src/TestRoom.js
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, List, ListItem, ListItemText } from '@mui/material';
+import { useAuth } from './AuthContext'; // Ensure this is the correct path
+import axios from 'axios';
 
 const TestRoom = ({ roomName }) => {
   const [ws, setWs] = useState(null);
   const [answer, setAnswer] = useState('');
   const [answers, setAnswers] = useState([]);
+  const { token } = useAuth();
+  const [username, setUsername] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/ws/${roomName}`);
-    setWs(socket);
+    if (token) {
+        axios.get("http://localhost:8000/users/me", {
+            headers: { Authorization: `Bearer ${token}` }
+        }).then(response => {
+            setUsername(response.data.username);
+            setIsAuthenticated(true);
+        }).catch(() => {
+            setIsAuthenticated(false);
+        });
+    }
+}, [token]);
 
-    socket.onmessage = (event) => {
-      setAnswers((prevAnswers) => [...prevAnswers, event.data]);
-    };
+  useEffect(() => {
+    if (username && isAuthenticated) {
+      const socket = new WebSocket(`ws://localhost:8000/ws/room/${roomName}/user/${username}`);
+      setWs(socket);
 
-    return () => {
-      socket.close();
-    };
-  }, [roomName]);
+      socket.onmessage = (event) => {
+        setAnswers((prevAnswers) => [...prevAnswers, event.data]);
+      };
+
+      return () => {
+        socket.close();
+      };
+    }
+  }, [roomName, username, isAuthenticated]);
 
   const submitAnswer = () => {
     if (ws && answer) {
