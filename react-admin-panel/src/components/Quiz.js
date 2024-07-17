@@ -59,7 +59,7 @@ const Quiz = ({ roomName }) => {
 
     useEffect(() => {
         if (isAuthenticated) {
-            const socket = new WebSocket(`ws://contestsystembackend.onrender.com/ws/room/${roomName}/user/${username}`);
+            const socket = new WebSocket(`wss://contestsystembackend.onrender.com/ws/room/${roomName}/user/${username}`);
             setWs(socket);
 
             socket.onmessage = (event) => {
