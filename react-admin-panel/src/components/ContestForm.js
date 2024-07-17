@@ -21,7 +21,7 @@ const ContestForm = () => {
     const fetchQuestions = async () => {
       setLoadingQuestions(true);
       try {
-        const response = await axios.get('http://localhost:8000/questions/');
+        const response = await axios.get('https://contestsystembackend.onrender.com/questions/');
         setQuestions(response.data);
       } catch (error) {
         console.error('Error fetching questions:', error);
@@ -69,7 +69,7 @@ const ContestForm = () => {
     formData.append('file', e.target.files[0]);
 
     try {
-      const response = await axios.post('http://localhost:8000/uploadimage/', formData);
+      const response = await axios.post('https://contestsystembackend.onrender.com/uploadimage/', formData);
       setQuestionData({
         ...questionData,
         image_url: response.data.image_url
@@ -81,7 +81,7 @@ const ContestForm = () => {
 
   const addQuestion = async () => {
     try {
-      const response = await axios.post('http://localhost:8000/questions/', questionData);
+      const response = await axios.post('https://contestsystembackend.onrender.com/questions/', questionData);
       console.log('Question created:', response.data);
       setQuestions([...questions, response.data]);
       setQuestionData({
@@ -97,7 +97,7 @@ const ContestForm = () => {
   const addContest = async () => {
     try {
       setLoadingContest(true);
-      const response = await axios.post('http://localhost:8000/contests/', contestData);
+      const response = await axios.post('https://contestsystembackend.onrender.com/contests/', contestData);
       console.log('Contest created:', response.data);
       setContestData({
         name: '',
