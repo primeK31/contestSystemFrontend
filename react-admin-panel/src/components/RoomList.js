@@ -15,11 +15,11 @@ const RoomList = ({ onSelectRoom }) => {
 
   useEffect(() => {
     const fetchRooms = async () => {
-      const response = await axios.get('https://contest-system-frontend.vercel.app/rooms/');
+      const response = await axios.get('https://contestsystembackend.onrender.com/rooms/');
       setRooms(response.data);
     };
     const fetchContests = async () => {
-      const response = await axios.get('https://contest-system-frontend.vercel.app/contests/');
+      const response = await axios.get('https://contestsystembackend.onrender.com/contests/');
       // const response = await axios.get('http://localhost:8000/supercontests/');
       console.log(response.data);
       setContests(response.data);
@@ -33,7 +33,7 @@ const RoomList = ({ onSelectRoom }) => {
     if (newRoomName && selectedContest) {
       console.log(newRoomName);
       console.log(contestJson);
-      await axios.post('https://contest-system-frontend.vercel.app/rooms/', {
+      await axios.post('https://contestsystembackend.onrender.com/rooms/', {
         name: newRoomName,
         contests: contestJson,
       });
