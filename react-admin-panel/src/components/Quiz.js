@@ -20,19 +20,18 @@ const Quiz = ({ roomName }) => {
     const [rating, setRating] = useState('');
     const [ratingList, setRatingList] = useState([]);
 
-
     useEffect(() => {
         const fetchData = async () => {
             if (token) {
                 try {
-                    const response = await axios.get("http://localhost:8000/users/me", {
+                    const response = await axios.get("https://contestsystembackend.onrender.com/users/me", {
                         headers: { Authorization: `Bearer ${token}` }
                     });
                     setUsername(response.data.username);
                     setIsAuthenticated(true);
 
                     try {
-                        const postResponse = await axios.post("http://localhost:8000/rate/", {
+                        const postResponse = await axios.post("https://contestsystembackend.onrender.com/rate/", {
                             "username": response.data.username,
                             "rating": 0,
                             "room_name": roomName
@@ -43,7 +42,7 @@ const Quiz = ({ roomName }) => {
                     }
 
                     try {
-                        const getResponse = await axios.get(`http://localhost:8000/get_room_rating/${roomName}`);
+                        const getResponse = await axios.get(`https://contestsystembackend.onrender.com/get_room_rating/${roomName}`);
                         console.log(getResponse.data);
                         setRatingList(getResponse.data);
                     } catch (postError) {
@@ -60,7 +59,7 @@ const Quiz = ({ roomName }) => {
 
     useEffect(() => {
         if (isAuthenticated) {
-            const socket = new WebSocket(`ws://localhost:8000/ws/room/${roomName}/user/${username}`);
+            const socket = new WebSocket(`ws://contestsystembackend.onrender.com/ws/room/${roomName}/user/${username}`);
             setWs(socket);
 
             socket.onmessage = (event) => {
@@ -69,15 +68,14 @@ const Quiz = ({ roomName }) => {
 
                     if (Array.isArray(data)) {
                         setRatingList(data);
-                    } else {
-                        setAnswers((prevAnswers) => [...prevAnswers, event.data]);
                     }
+                    setAnswers((prevAnswers) => [...prevAnswers, event.data]);
                 } catch (error) {
                     console.error('Error parsing WebSocket message:', error);
                 }
             };
 
-            axios.get('http://localhost:8000/questions', {
+            axios.get('https://contestsystembackend.onrender.com/questions', {
                 headers: { Authorization: `Bearer ${token}` }
             })
                 .then(response => {
@@ -87,7 +85,7 @@ const Quiz = ({ roomName }) => {
                     console.error("There was an error fetching the questions!", error);
                 });
 
-            axios.get(`http://localhost:8000/rooms/${roomName}`, {
+            axios.get(`https://contestsystembackend.onrender.com/rooms/${roomName}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
                 .then(response => {
@@ -96,6 +94,10 @@ const Quiz = ({ roomName }) => {
                 .catch(error => {
                     console.error("There was an error fetching the room!", error);
                 });
+
+            socket.onclose = () => {
+                console.log('WebSocket connection closed');
+            };
 
             return () => {
                 socket.close();
@@ -120,19 +122,20 @@ const Quiz = ({ roomName }) => {
             setScore(score + 1);
             const newRating = rating + 10;
             setRating(newRating);
+
             try {
-                const response = await axios.put('http://localhost:8000/update_rating/', {
+                const response = await axios.put('https://contestsystembackend.onrender.com/update_rating/', {
                     username: username,
                     room_name: roomName,
                     rating: newRating
                 });
 
-                /*const updatedRatingList = ratingList.map(item =>
+                const updatedRatingList = ratingList.map(item =>
                     item.username === username
                         ? { ...item, rating: newRating }
                         : item
                 );
-                setRatingList(updatedRatingList);*/
+                setRatingList(updatedRatingList);
             } catch (error) {
                 console.error('Error updating rating:', error);
             }
@@ -148,83 +151,95 @@ const Quiz = ({ roomName }) => {
 
     const submitAnswer = () => {
         if (ws && answer) {
-          ws.send(answer);
-          setAnswer('');
+            ws.send(answer);
+            setAnswer('');
         }
-      };
+    };
 
     const handleLogin = async () => {
         await login(username, password);
     };
 
     return (
-        <div className="quiz">
-            <h1>Quiz Component {rating}</h1>
+        <div className="p-4 bg-white rounded-lg shadow-md">
+            <h1 className="text-2xl font-bold mb-4">Quiz Component {rating}</h1>
             {!isAuthenticated ? (
-                <div>
-                    <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
-                    <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                    <button onClick={handleLogin}>Login</button>
+                <div className="mb-4">
+                    <input 
+                        type="text" 
+                        placeholder="Username" 
+                        value={username} 
+                        onChange={(e) => setUsername(e.target.value)} 
+                        className="w-full p-2 mb-2 border border-gray-300 rounded"
+                    />
+                    <input 
+                        type="password" 
+                        placeholder="Password" 
+                        value={password} 
+                        onChange={(e) => setPassword(e.target.value)} 
+                        className="w-full p-2 mb-2 border border-gray-300 rounded"
+                    />
+                    <button 
+                        onClick={handleLogin} 
+                        className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                    >
+                        Login
+                    </button>
                 </div>
             ) : (
                 <>
-                <List>
-        {answers.map((ans, index) => (
-          <ListItem key={index}>
-            <ListItemText primary={ans} />
-          </ListItem>
-        ))}
-      </List>
-      <TextField
-        label="Answer"
-        value={answer}
-        onChange={(e) => setAnswer(e.target.value)}
-        onKeyPress={(e) => {
-          if (e.key === 'Enter') {
-            submitAnswer();
-          }
-        }}
-      />
-        <div>
-            <h2>Ratings</h2>
-            <ul>
-                {ratingList.map((rating_item, index) => (
-                    <li key={index}>
-                        User: {rating_item.username},  Rating: {rating_item.rating}
-                    </li>
-                ))}
-            </ul>
-        </div>
-      <Button variant="contained" color="primary" onClick={submitAnswer}>
-        Submit
-      </Button>
-                    <button onClick={logout}>Logout</button>
+                    <div className="mb-4">
+                        <h2 className="text-xl font-semibold">Ratings</h2>
+                        <ul>
+                            {ratingList
+                                .sort((a, b) => b.rating - a.rating)
+                                .map((rating_item, index) => (
+                                    <li key={index} className="p-2 mb-2 bg-gray-100 rounded">
+                                        User: {rating_item.username}, Rating: {rating_item.rating}
+                                    </li>
+                                ))}
+                        </ul>
+                    </div>
+                    <button 
+                        onClick={submitAnswer} 
+                        className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4"
+                    >
+                        Submit
+                    </button>
+                    <button 
+                        onClick={logout} 
+                        className="w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-4"
+                    >
+                        Logout
+                    </button>
                     {showScore ? (
-                        <div className="score-section">
+                        <div className="score-section text-center text-xl font-bold">
                             You scored {score} out of {newQuestions.length}
                         </div>
                     ) : (
-                        <>
-                            {newQuestions.length > 0 && (
-                                <>
-                                    <div className="question-section">
-                                        <div className="question-count">
-                                            <span>Question {currentQuestionIndex + 1}</span>/{newQuestions.length}
-                                        </div>
-                                        <div className="question-text">
-                                            {newQuestions[currentQuestionIndex].question}
-                                        </div>
+                        newQuestions.length > 0 && (
+                            <>
+                                <div className="question-section mb-4">
+                                    <div className="question-count text-lg font-semibold mb-2">
+                                        <span>Question {currentQuestionIndex + 1}</span>/{newQuestions.length}
                                     </div>
-                                    <div className="answer-section">
-                                        {newQuestions[currentQuestionIndex].options.map((option, index) => (
-                                            <button onClick={() => handleAnswerOptionClick(option)} key={index}>
-                                                {option}
-                                            </button>
-                                        ))}
+                                    <div className="question-text text-lg mb-2">
+                                        {newQuestions[currentQuestionIndex].question}
                                     </div>
-                                </>
-                            )}
-                        </>
+                                </div>
+                                <div className="answer-section">
+                                    {newQuestions[currentQuestionIndex].options.map((option, index) => (
+                                        <button 
+                                            onClick={() => handleAnswerOptionClick(option)} 
+                                            key={index} 
+                                            className="w-full bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded mb-2"
+                                        >
+                                            {option}
+                                        </button>
+                                    ))}
+                                </div>
+                            </>
+                        )
                     )}
                 </>
             )}

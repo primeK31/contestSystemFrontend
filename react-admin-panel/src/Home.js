@@ -65,14 +65,14 @@ function Home() {
           stroke-linejoin="round"
           className="h-6 w-6"
          />
-        <span className="font-bold">RegularAI</span>
+        <span className="font-bold"><a href="/home">RegularAI</a></span>
       </a>
       <nav className="hidden space-x-4 md:flex">
-        <a className="hover:text-primary-foreground/80 transition-colors" href="#">
-          Features
+        <a className="hover:text-primary-foreground/80 transition-colors" href="/home">
+          Home
         </a>
-        <a className="hover:text-primary-foreground/80 transition-colors" href="#">
-          Pricing
+        <a className="hover:text-primary-foreground/80 transition-colors" href="/rooms">
+          Rooms
         </a>
         <a className="hover:text-primary-foreground/80 transition-colors" href="#">
           Contact
@@ -92,7 +92,7 @@ function Home() {
               Solve Engaging quizzes
             </h1>
             <p className="max-w-[600px] text-primary-foreground/80 md:text-xl">
-              Our forms generator makes it simple to create, customize, and share interactive quizzes to test your
+              Our forms generator and contest makes it simple to create, customize, and share interactive quizzes to test your
               knowledge.
             </p>
             <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 px-4 py-2 w-full sm:w-auto">
@@ -128,9 +128,9 @@ function Home() {
                 <polyline points="16 6 12 2 8 6"></polyline>
                 <line x1="12" x2="12" y1="2" y2="15"></line>
               </svg>
-              <h3 className="text-xl font-bold text-foreground">Load the file</h3>
+              <h3 className="text-xl font-bold text-foreground">Regiter</h3>
               <p className="text-muted-foreground">
-              Upload a PDF file based on which you want to generate the form
+              Create your account
               </p>
             </div>
             <div className="space-y-2">
@@ -150,8 +150,8 @@ function Home() {
                 <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
                 <path d="M10.4 12.6a2 2 0 1 1 3 3L8 21l-4 1 1-4Z"></path>
               </svg>
-              <h3 className="text-xl font-bold text-foreground">Write your preferences for the form</h3>
-              <p className="text-muted-foreground">Then press to Load button</p>
+              <h3 className="text-xl font-bold text-foreground">Go to the rooms</h3>
+              <p className="text-muted-foreground">And select</p>
             </div>
             <div className="space-y-2">
               <svg
@@ -168,9 +168,9 @@ function Home() {
               >
                 <path d="M20 6 9 17l-5-5"></path>
               </svg>
-              <h3 className="text-xl font-bold text-foreground">Get the link!</h3>
+              <h3 className="text-xl font-bold text-foreground">Start solving!</h3>
               <p className="text-muted-foreground">
-                After pressing Load button press Submit button
+                And you also can have competition wuth your friends
               </p>
             </div>
           </div>

@@ -50,20 +50,30 @@ const RoomList = ({ onSelectRoom }) => {
   };
 
   return (
-    <div>
-      <List>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <ul className="mb-4">
         {rooms.map((room, index) => (
-          <ListItem key={index} button onClick={() => onSelectRoom(room.name)}>
-            <ListItemText primary={room.name} />
-          </ListItem>
+          <li 
+            key={index} 
+            className="p-2 mb-2 bg-gray-100 rounded cursor-pointer hover:bg-gray-200" 
+            onClick={() => onSelectRoom(room.name)}
+          >
+            {room.name}
+          </li>
         ))}
-      </List>
-      <TextField
-        label="New Room Name"
+      </ul>
+      <input
+        type="text"
+        placeholder="New Room Name"
         value={newRoomName}
         onChange={(e) => setNewRoomName(e.target.value)}
+        className="w-full p-2 mb-2 border border-gray-300 rounded"
       />
-      <select value={selectedContest} onChange={handleSelect}>
+      <select 
+        value={selectedContest} 
+        onChange={handleSelect} 
+        className="w-full p-2 mb-4 border border-gray-300 rounded"
+      >
         <option value="">Select a contest</option>
         {contests.map((contest, index) => (
           <option key={index} value={contest.name}>
@@ -71,9 +81,12 @@ const RoomList = ({ onSelectRoom }) => {
           </option>
         ))}
       </select>
-      <Button variant="contained" color="primary" onClick={createRoom}>
+      <button 
+        onClick={createRoom} 
+        className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
         Create Room
-      </Button>
+      </button>
     </div>
   );
 };

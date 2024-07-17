@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (username, password) => {
         try {
-            const response = await axios.post("http://localhost:8000/token_user", new URLSearchParams({ username, password }));
+            const response = await axios.post("https://contestsystembackend.onrender.com/token_user", new URLSearchParams({ username, password }));
             setToken(response.data.access_token);
         } catch (error) {
             console.error("Login failed", error);

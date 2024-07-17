@@ -38,7 +38,7 @@ const AdminPanel = () => {
 
   const login = async () => {
     try {
-      const response = await axios.post('http://localhost:8000/token', new URLSearchParams({
+      const response = await axios.post('https://contestsystembackend.onrender.com/token', new URLSearchParams({
         username,
         password
       }));
@@ -54,7 +54,7 @@ const AdminPanel = () => {
     formData.append('prompt', textInput);
     console.log(textInput);
 
-    const response = await fetch('http://localhost:8000/aigen/', {
+    const response = await fetch('https://contestsystembackend.onrender.com/aigen/', {
       method: 'POST',
       body: formData,
     });
@@ -63,7 +63,7 @@ const AdminPanel = () => {
     console.log(JSON.stringify(result.text));
     console.log(result.text);
 
-    const res = await fetch('http://localhost:8000/quiz/', {
+    const res = await fetch('https://contestsystembackend.onrender.com/quiz/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -84,35 +84,58 @@ const AdminPanel = () => {
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
       {token ? (
-      <><RoomList onSelectRoom={handleSelectRoom} /><ContestForm /></>
+        <>
+          <RoomList onSelectRoom={handleSelectRoom} />
+          <ContestForm />
+        </>
       ) : (
-        <div>
-          <h2>Login</h2>
+        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+          <h2 className="text-2xl font-semibold mb-4 text-center">Login</h2>
           <input
             type="text"
             placeholder="Username"
             value={username}
             onChange={e => setUsername(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded mb-4"
           />
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={e => setPassword(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded mb-4"
           />
-          <button onClick={login}>Login</button>
-          <h2>AI</h2>
+          <button 
+            onClick={login}
+            className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
+          >
+            Login
+          </button>
+          <h2 className="text-2xl font-semibold mb-4 text-center">AI</h2>
           <div>
-            <input type="text" value={textInput} onChange={(e) => setTextInput(e.target.value)} placeholder="Напишите свои предпочтения для формы" className="flex-1 p-2 m-5 border border-gray-200 rounded-l-lg" />
-            <button className="m-5 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50" onClick={onFileUpload}>Загрузить!</button>
-            {loading ?                 <div><div className='flex items-center justify-center'>
-                <div className="spinner"></div>
-                </div>
-            <div className='flex items-center justify-center'>
-            <p className="loading-text text-sm">Получаем ответ от ИИ</p>
-            </div> </div> : <div id="ready">{message}</div>}
+            <input 
+              type="text" 
+              value={textInput} 
+              onChange={(e) => setTextInput(e.target.value)} 
+              placeholder="Напишите свои предпочтения для формы" 
+              className="w-full p-2 border border-gray-300 rounded mb-4"
+            />
+            <button 
+              className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4" 
+              onClick={onFileUpload}
+            >
+              Загрузить!
+            </button>
+            {loading ? (
+              <div className="flex flex-col items-center">
+                <div className="spinner border-t-4 border-b-4 border-blue-500 rounded-full w-12 h-12 mb-4"></div>
+                <p className="loading-text text-sm">Получаем ответ от ИИ</p>
+              </div>
+            ) : (
+              <div id="ready" className="text-center text-green-500 font-semibold">{message}</div>
+            )}
           </div>
         </div>
       )}

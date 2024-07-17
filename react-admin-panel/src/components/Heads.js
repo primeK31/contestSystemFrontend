@@ -24,11 +24,11 @@ function Heads() {
     <span className="font-bold">Quiz Generator</span>
   </a>
   <nav className="hidden space-x-4 md:flex">
-    <a className="hover:text-primary-foreground/80 transition-colors" href="#">
-      Features
+    <a className="hover:text-primary-foreground/80 transition-colors" href="/home">
+      Home
     </a>
-    <a className="hover:text-primary-foreground/80 transition-colors" href="#">
-      Pricing
+    <a className="hover:text-primary-foreground/80 transition-colors" href="/rooms">
+      Rooms
     </a>
     <a className="hover:text-primary-foreground/80 transition-colors" href="#">
       Contact

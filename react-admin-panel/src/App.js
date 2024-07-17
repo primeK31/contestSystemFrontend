@@ -37,7 +37,7 @@ const App = () => {
 
   const login = async () => {
     try {
-      const response = await axios.post('http://localhost:8000/token', new URLSearchParams({
+      const response = await axios.post('https://contestsystembackend.onrender.com/token', new URLSearchParams({
         username,
         password
       }));
@@ -50,11 +50,11 @@ const App = () => {
   return (
     <div>
       <Routes>
-        <Route path='/' element={<Home />} />
-        <Route path='/register' element={<Register />} />
-        <Route path='/admin' element={<AdminPanel />} />
-        <Route path='/login' element={<UserLogin />} />
-        <Route path='/rooms' element={<Rooms />} />
+          <Route path='/' element={<Home />} />
+          <Route path='/register' element={<Register />} />
+          <Route path='/admin' element={<AdminPanel />} />
+          <Route path='/login' element={<UserLogin />} />
+          <Route path='/rooms' element={<Rooms />} />
       </Routes>
     </div>
   );

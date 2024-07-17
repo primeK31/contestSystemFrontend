@@ -27,7 +27,7 @@ const Rooms = () => {
 
   const login = async () => {
     try {
-      const response = await axios.post('http://localhost:8000/token', new URLSearchParams({
+      const response = await axios.post('https://contestsystembackend.onrender.com/token', new URLSearchParams({
         username,
         password
       }));
