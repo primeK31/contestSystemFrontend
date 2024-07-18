@@ -198,6 +198,7 @@ const Quiz = ({ roomName }) => {
                             <>
                                 <div className="question-section mb-4">
                                     <div className="question-count text-lg font-semibold mb-2">
+                                        <img src={questions[currentQuestionIndex].image_url} alt={questions[currentQuestionIndex].image_url} />
                                         <span>Question {currentQuestionIndex + 1}</span>/{questions.length}
                                     </div>
                                     <div className="question-text text-lg mb-2">

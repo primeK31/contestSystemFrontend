@@ -13,6 +13,7 @@ import { AuthProvider } from './components/AuthContext';
 import AdminPanel from './AdminPanel';
 import Rooms from './Rooms';
 import Home from './Home';
+import Timer from './components/Timer';
 
 
 
@@ -55,6 +56,7 @@ const App = () => {
           <Route path='/admin' element={<AdminPanel />} />
           <Route path='/login' element={<UserLogin />} />
           <Route path='/rooms' element={<Rooms />} />
+          <Route path='/timer' element={<Timer />} />
       </Routes>
     </div>
   );

@@ -24,6 +24,10 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(false);
 
+  const [uploadStatus, setUploadStatus] = useState('');
+  const [dragging, setDragging] = useState(false);
+  const [ selectedFile, setSelectedFile ] = useState(null);
+
   const handleSelectRoom = (room) => {
     setRoomName(room);
     setEnteredRoom(true);
@@ -34,6 +38,45 @@ const AdminPanel = () => {
       console.log('Success!');
     }
   }, [token]);
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+    if (!dragging) {
+      setDragging(true);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragging(false);
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    setDragging(false);
+    const files = event.dataTransfer.files;
+    handleFiles(files);
+  };
+
+  const handleFiles = (files) => {
+    console.log('Files:', files);
+    // Simulate file upload success
+    setTimeout(() => {
+      setUploadStatus(`Successfully uploaded ${files.length} file(s)`);
+    }, 1000);
+  };
+
+  const handleFileSelect = (event) => {
+    const files = event.target.files;
+    handleFiles(files);
+  };
+
+
+  const onFileChange = event => {
+    setSelectedFile(event.target.files[0]);
+    setTimeout(() => {
+      setUploadStatus(`Successfully uploaded file`);
+    }, 1000);
+  };
 
 
   const login = async () => {
@@ -115,6 +158,29 @@ const AdminPanel = () => {
           </button>
           <h2 className="text-2xl font-semibold mb-4 text-center">AI</h2>
           <div>
+          <div
+              id="dropzone"
+              className={`dropzone p-8 text-center border-2 border-dashed rounded-lg transition-colors ${dragging ? 'bg-gray-100' : 'bg-white'}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => document.getElementById('fileInput').click()}
+            >
+              <p className="mb-4 text-lg font-semibold text-gray-700">Drag & Drop your files here</p>
+              <p className="text-sm text-gray-500">or click to select files</p>
+              <input
+                id="fileInput"
+                type="file"
+                className="hidden"
+                multiple
+                onChange={onFileChange}
+              />
+          </div>
+          {uploadStatus && (
+              <div className="mt-4 p-2 text-green-700 bg-green-100 border border-green-400 rounded">
+                {uploadStatus}
+              </div>
+          )}
             <input 
               type="text" 
               value={textInput} 

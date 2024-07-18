@@ -75,6 +75,7 @@ const ContestForm = () => {
         ...questionData,
         image_url: response.data.image_url
       });
+      console.log(response.data.image_url);
     } catch (error) {
       console.error('Error uploading image:', error);
     }
