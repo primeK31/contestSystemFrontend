@@ -3,10 +3,11 @@ import axios from 'axios';
 
 const ContestForm = () => {
   const [questions, setQuestions] = useState([]);
-  const [contestData, setContestData] = useState({
+  const [superContestData, setSuperContestData] = useState({
     name: '',
     description: '',
     question_ids: [],
+    questions: [],
     time_limit: 0
   });
   const [questionData, setQuestionData] = useState({
@@ -15,7 +16,7 @@ const ContestForm = () => {
     correct_answer: ''
   });
   const [loadingQuestions, setLoadingQuestions] = useState(false);
-  const [loadingContest, setLoadingContest] = useState(false);
+  const [loadingSuperContest, setLoadingSuperContest] = useState(false);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -32,10 +33,10 @@ const ContestForm = () => {
     fetchQuestions();
   }, []);
 
-  const handleContestChange = (e) => {
+  const handleSuperContestChange = (e) => {
     const { name, value } = e.target;
-    setContestData({
-      ...contestData,
+    setSuperContestData({
+      ...superContestData,
       [name]: value
     });
   };
@@ -94,29 +95,34 @@ const ContestForm = () => {
     }
   };
 
-  const addContest = async () => {
+  const addSuperContest = async () => {
     try {
-      setLoadingContest(true);
-      const response = await axios.post('https://contestsystembackend.onrender.com/contests/', contestData);
-      console.log('Contest created:', response.data);
-      setContestData({
+      setLoadingSuperContest(true);
+      const questionObjects = questions.filter(question => superContestData.question_ids.includes(question.question));
+      const response = await axios.post('https://contestsystembackend.onrender.com/supercontests/', {
+        ...superContestData,
+        questions: questionObjects
+      });
+      console.log('Super Contest created:', response.data);
+      setSuperContestData({
         name: '',
         description: '',
+        questions: [],
         question_ids: [],
         time_limit: 0
       });
     } catch (error) {
-      console.error('Error creating contest:', error);
+      console.error('Error creating Super Contest:', error);
     } finally {
-      setLoadingContest(false);
+      setLoadingSuperContest(false);
     }
   };
 
   const handleQuestionChange = (e) => {
     const { options } = e.target;
     const selectedQuestions = Array.from(options).filter(option => option.selected).map(option => option.value);
-    setContestData({
-      ...contestData,
+    setSuperContestData({
+      ...superContestData,
       question_ids: selectedQuestions
     });
   };
@@ -164,26 +170,26 @@ const ContestForm = () => {
 
       <hr />
 
-      <h2>Create Contest</h2>
-      <form onSubmit={(e) => { e.preventDefault(); addContest(); }}>
+      <h2>Create Super Contest</h2>
+      <form onSubmit={(e) => { e.preventDefault(); addSuperContest(); }}>
         <input
           type="text"
           name="name"
-          placeholder="Contest Name"
-          value={contestData.name}
-          onChange={handleContestChange}
+          placeholder="Super Contest Name"
+          value={superContestData.name}
+          onChange={handleSuperContestChange}
           required
         />
         <textarea
           name="description"
           placeholder="Description"
-          value={contestData.description}
-          onChange={handleContestChange}
+          value={superContestData.description}
+          onChange={handleSuperContestChange}
           required
         />
         <select
           multiple={true}
-          value={contestData.question_ids}
+          value={superContestData.question_ids}
           onChange={handleQuestionChange}
           required
         >
@@ -201,11 +207,11 @@ const ContestForm = () => {
           type="number"
           name="time_limit"
           placeholder="Time Limit (in minutes)"
-          value={contestData.time_limit}
-          onChange={handleContestChange}
+          value={superContestData.time_limit}
+          onChange={handleSuperContestChange}
           required
         />
-        <button type="submit" disabled={loadingContest}>{loadingContest ? 'Creating Contest...' : 'Create Contest'}</button>
+        <button type="submit" disabled={loadingSuperContest}>{loadingSuperContest ? 'Creating Super Contest...' : 'Create Super Contest'}</button>
       </form>
     </div>
   );

@@ -5,11 +5,9 @@ import { TextField, Button, List, ListItem, ListItemText } from '@mui/material';
 
 const Quiz = ({ roomName }) => {
     const [questions, setQuestions] = useState([]);
-    const [questionList, setQuestionList] = useState([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [score, setScore] = useState(0);
     const [showScore, setShowScore] = useState(false);
-    const [newQuestions, setNewQuestions] = useState([]);
     const [ws, setWs] = useState(null);
     const [answers, setAnswers] = useState([]);
     const { token, login, logout } = useAuth();
@@ -75,21 +73,12 @@ const Quiz = ({ roomName }) => {
                 }
             };
 
-            axios.get('https://contestsystembackend.onrender.com/questions', {
-                headers: { Authorization: `Bearer ${token}` }
-            })
-                .then(response => {
-                    setQuestions(response.data);
-                })
-                .catch(error => {
-                    console.error("There was an error fetching the questions!", error);
-                });
-
             axios.get(`https://contestsystembackend.onrender.com/rooms/${roomName}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
                 .then(response => {
-                    setQuestionList(response.data.contests.question_ids);
+                    console.log(response.data);
+                    setQuestions(response.data.contests.questions);
                 })
                 .catch(error => {
                     console.error("There was an error fetching the room!", error);
@@ -105,20 +94,8 @@ const Quiz = ({ roomName }) => {
         }
     }, [isAuthenticated, username]);
 
-    useEffect(() => {
-        let newList = [];
-        for (let name of questionList) {
-            for (let question of questions) {
-                if (name === question.question) {
-                    newList.push(question);
-                }
-            }
-        }
-        setNewQuestions(newList);
-    }, [questions, questionList]);
-
     const handleAnswerOptionClick = async (selectedOption) => {
-        if (selectedOption === newQuestions[currentQuestionIndex].correct_answer) {
+        if (selectedOption === questions[currentQuestionIndex]?.correct_answer) {
             setScore(score + 1);
             const newRating = rating + 10;
             setRating(newRating);
@@ -142,7 +119,7 @@ const Quiz = ({ roomName }) => {
         }
 
         const nextQuestion = currentQuestionIndex + 1;
-        if (nextQuestion < newQuestions.length) {
+        if (questions && nextQuestion < questions.length) {
             setCurrentQuestionIndex(nextQuestion);
         } else {
             setShowScore(true);
@@ -214,21 +191,21 @@ const Quiz = ({ roomName }) => {
                     </button>
                     {showScore ? (
                         <div className="score-section text-center text-xl font-bold">
-                            You scored {score} out of {newQuestions.length}
+                            You scored {score} out of {questions?.length || 0}
                         </div>
                     ) : (
-                        newQuestions.length > 0 && (
+                        questions?.length > 0 && (
                             <>
                                 <div className="question-section mb-4">
                                     <div className="question-count text-lg font-semibold mb-2">
-                                        <span>Question {currentQuestionIndex + 1}</span>/{newQuestions.length}
+                                        <span>Question {currentQuestionIndex + 1}</span>/{questions.length}
                                     </div>
                                     <div className="question-text text-lg mb-2">
-                                        {newQuestions[currentQuestionIndex].question}
+                                        {questions[currentQuestionIndex].question}
                                     </div>
                                 </div>
                                 <div className="answer-section">
-                                    {newQuestions[currentQuestionIndex].options.map((option, index) => (
+                                    {questions[currentQuestionIndex].options.map((option, index) => (
                                         <button 
                                             onClick={() => handleAnswerOptionClick(option)} 
                                             key={index} 

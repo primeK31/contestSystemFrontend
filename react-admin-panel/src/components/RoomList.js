@@ -19,7 +19,7 @@ const RoomList = ({ onSelectRoom }) => {
       setRooms(response.data);
     };
     const fetchContests = async () => {
-      const response = await axios.get('https://contestsystembackend.onrender.com/contests/');
+      const response = await axios.get('https://contestsystembackend.onrender.com/supercontests/');
       // const response = await axios.get('http://localhost:8000/supercontests/');
       console.log(response.data);
       setContests(response.data);
