@@ -132,32 +132,7 @@ const AdminPanel = () => {
         <>
           <RoomList onSelectRoom={handleSelectRoom} />
           <ContestForm />
-        </>
-      ) : (
-        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-          <h2 className="text-2xl font-semibold mb-4 text-center">Login</h2>
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded mb-4"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded mb-4"
-          />
-          <button 
-            onClick={login}
-            className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
-          >
-            Login
-          </button>
           <h2 className="text-2xl font-semibold mb-4 text-center">AI</h2>
-          <div>
           <div
               id="dropzone"
               className={`dropzone p-8 text-center border-2 border-dashed rounded-lg transition-colors ${dragging ? 'bg-gray-100' : 'bg-white'}`}
@@ -202,7 +177,30 @@ const AdminPanel = () => {
             ) : (
               <div id="ready" className="text-center text-green-500 font-semibold">{message}</div>
             )}
-          </div>
+        </>
+      ) : (
+        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+          <h2 className="text-2xl font-semibold mb-4 text-center">Login</h2>
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded mb-4"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded mb-4"
+          />
+          <button 
+            onClick={login}
+            className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
+          >
+            Login
+          </button>
         </div>
       )}
     </div>

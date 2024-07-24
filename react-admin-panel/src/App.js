@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ContestForm from './components/ContestForm';
 import axios from 'axios';
-import { Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import User from './components/User'
 import { TextField, Button } from '@mui/material';
 import RoomList from './components/RoomList';
@@ -14,6 +14,11 @@ import AdminPanel from './AdminPanel';
 import Rooms from './Rooms';
 import Home from './Home';
 import Timer from './components/Timer';
+import SpecialPageRedirect from './components/SpecialPageRedirect';
+import Heads from './components/Heads';
+import Foots from './components/Foots';
+import Login from './components/Login';
+import Dashboard from './Dashboard';
 
 
 
@@ -50,16 +55,32 @@ const App = () => {
 
   return (
     <div>
-      <Routes>
+      <Heads />
+        <Routes>
           <Route path='/' element={<Home />} />
           <Route path='/register' element={<Register />} />
           <Route path='/admin' element={<AdminPanel />} />
-          <Route path='/login' element={<UserLogin />} />
+          <Route path="/login" element={<Login />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            } 
+          />
+          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path='/rooms' element={<Rooms />} />
           <Route path='/timer' element={<Timer />} />
-      </Routes>
+          <Route path='/special' element={<SpecialPageRedirect/>} />
+        </Routes>
+      <Foots />
     </div>
   );
+};
+
+const PrivateRoute = ({ children }) => {
+  return localStorage.getItem('access_token') ? children : <Navigate to="/login" replace />;
 };
 
 export default App;

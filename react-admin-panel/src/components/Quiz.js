@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 import { TextField, Button, List, ListItem, ListItemText } from '@mui/material';
@@ -17,6 +17,36 @@ const Quiz = ({ roomName }) => {
     const [answer, setAnswer] = useState('');
     const [rating, setRating] = useState('');
     const [ratingList, setRatingList] = useState([]);
+    const [timeLeft, setTimeLeft] = useState(10);
+
+    const timerRef = useRef(null);
+
+    const [messages, setMessages] = useState([]);
+    const [message, setMessage] = useState('');
+
+
+    useEffect(() => {
+        const fetchMessages = async () => {
+            const result = await axios.get('http://localhost:8000/messages/');
+            setMessages(result.data);
+        };
+    
+        fetchMessages();
+    }, []);
+
+    const handleSendMessage = async () => {
+        if (message.trim() && username.trim()) {
+            const msg = {
+                username: username,
+                content: message,
+                room_name: roomName
+            };
+            console.log(msg);
+            console.log(JSON.stringify(msg));
+            await axios.post('http://localhost:8000/messages/', msg);
+            setMessage('');
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -30,9 +60,9 @@ const Quiz = ({ roomName }) => {
 
                     try {
                         const postResponse = await axios.post("https://contestsystembackend.onrender.com/rate/", {
-                            "username": response.data.username,
-                            "rating": 0,
-                            "room_name": roomName
+                            username: response.data.username,
+                            rating: 0,
+                            room_name: roomName
                         });
                         setRating(postResponse.data.rating);
                     } catch (postError) {
@@ -57,17 +87,17 @@ const Quiz = ({ roomName }) => {
 
     useEffect(() => {
         if (isAuthenticated) {
-            const socket = new WebSocket(`wss://contestsystembackend.onrender.com/ws/room/${roomName}/user/${username}`);
+            const socket = new WebSocket(`ws://localhost:8000/ws/room/${roomName}/user/${username}`);
             setWs(socket);
 
             socket.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
-
                     if (Array.isArray(data)) {
                         setRatingList(data);
+                    } else if (data.username && data.content) {
+                        setMessages((prevMessages) => [...prevMessages, data]);
                     }
-                    setAnswers((prevAnswers) => [...prevAnswers, event.data]);
                 } catch (error) {
                     console.error('Error parsing WebSocket message:', error);
                 }
@@ -92,7 +122,7 @@ const Quiz = ({ roomName }) => {
                 socket.close();
             };
         }
-    }, [isAuthenticated, username]);
+    }, [isAuthenticated, username, roomName]);
 
     const handleAnswerOptionClick = async (selectedOption) => {
         if (selectedOption === questions[currentQuestionIndex]?.correct_answer) {
@@ -101,8 +131,8 @@ const Quiz = ({ roomName }) => {
             setRating(newRating);
 
             try {
-                const response = await axios.put('https://contestsystembackend.onrender.com/update_rating/', {
-                    username: username,
+                await axios.put('https://contestsystembackend.onrender.com/update_rating/', {
+                    username,
                     room_name: roomName,
                     rating: newRating
                 });
@@ -121,6 +151,7 @@ const Quiz = ({ roomName }) => {
         const nextQuestion = currentQuestionIndex + 1;
         if (questions && nextQuestion < questions.length) {
             setCurrentQuestionIndex(nextQuestion);
+            resetTimer();
         } else {
             setShowScore(true);
         }
@@ -128,13 +159,57 @@ const Quiz = ({ roomName }) => {
 
     const submitAnswer = () => {
         if (ws && answer) {
-            ws.send(answer);
+            ws.send(JSON.stringify({ answer, username, room_name: roomName }));
             setAnswer('');
         }
     };
 
     const handleLogin = async () => {
         await login(username, password);
+    };
+
+    useEffect(() => {
+        if (currentQuestionIndex < questions.length) {
+            timerRef.current = setTimeout(() => {
+                const nextQuestion = currentQuestionIndex + 1;
+                if (questions && nextQuestion < questions.length) {
+                    setCurrentQuestionIndex(nextQuestion);
+                    resetTimer();
+                } else {
+                    setShowScore(true);
+                }
+            }, 10000);
+
+            return () => {
+                clearTimeout(timerRef.current);
+            };
+        }
+    }, [currentQuestionIndex, questions.length]);
+
+    useEffect(() => {
+        if (timeLeft > 0) {
+            const timerId = setTimeout(() => {
+                setTimeLeft(timeLeft - 1);
+            }, 1000);
+            return () => clearTimeout(timerId);
+        } else {
+            handleNextQuestion();
+        }
+    }, [timeLeft]);
+
+    const resetTimer = () => {
+        setTimeLeft(10);
+    };
+
+    const handleNextQuestion = () => {
+        clearTimeout(timerRef.current);
+        const nextQuestion = currentQuestionIndex + 1;
+        if (questions && nextQuestion < questions.length) {
+            setCurrentQuestionIndex(nextQuestion);
+            resetTimer();
+        } else {
+            setShowScore(true);
+        }
     };
 
     return (
@@ -198,29 +273,67 @@ const Quiz = ({ roomName }) => {
                             <>
                                 <div className="question-section mb-4">
                                     <div className="question-count text-lg font-semibold mb-2">
-                                        <img src={questions[currentQuestionIndex].image_url} alt={questions[currentQuestionIndex].image_url} />
-                                        <span>Question {currentQuestionIndex + 1}</span>/{questions.length}
+                                        <img src={questions[currentQuestionIndex]?.image_url} alt={questions[currentQuestionIndex]?.image_url} />
+                                        <span>Question {currentQuestionIndex + 1}/{questions.length}</span>
                                     </div>
-                                    <div className="question-text text-lg mb-2">
-                                        {questions[currentQuestionIndex].question}
+                                    <div className="question-text text-lg font-semibold mb-2">
+                                        {questions[currentQuestionIndex]?.question}
                                     </div>
                                 </div>
-                                <div className="answer-section">
-                                    {questions[currentQuestionIndex].options.map((option, index) => (
-                                        <button 
-                                            onClick={() => handleAnswerOptionClick(option)} 
-                                            key={index} 
-                                            className="w-full bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded mb-2"
+                                <div className="answer-section mb-4">
+                                    {questions[currentQuestionIndex]?.options.map((option, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => handleAnswerOptionClick(option)}
+                                            className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2"
                                         >
                                             {option}
                                         </button>
                                     ))}
+                                </div>
+                                <div className="timer text-lg font-semibold mb-2">
+                                    Time left: {timeLeft} seconds
                                 </div>
                             </>
                         )
                     )}
                 </>
             )}
+            <div className="chat-section">
+                <h2 className="text-xl font-semibold mb-4">Chat</h2>
+                <div className="messages mb-4">
+                <List>
+                    {messages.map((msg, index) => (
+                        <ListItem key={index}>
+                            <ListItemText primary={`${msg.username}: ${msg.content}`} />
+                        </ListItem>
+                    ))}
+                </List>
+                </div>
+                <div className="send-message">
+                    <TextField
+                        label="Message"
+                        variant="outlined"
+                        fullWidth
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                                handleSendMessage();
+                                e.preventDefault();
+                            }
+                        }}
+                    />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleSendMessage}
+                        className="mt-2"
+                    >
+                        Send
+                    </Button>
+                </div>
+            </div>
         </div>
     );
 };

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { List, ListItem, ListItemText, Button, TextField } from '@mui/material';
+import Heads from './Heads.js';
+import Foots from './Foots.js';
 
 const RoomList = ({ onSelectRoom }) => {
   const [rooms, setRooms] = useState([]);
