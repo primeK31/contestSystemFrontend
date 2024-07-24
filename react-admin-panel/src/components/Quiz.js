@@ -10,7 +10,6 @@ const Quiz = ({ roomName }) => {
     const [showScore, setShowScore] = useState(false);
     const [ws, setWs] = useState(null);
     const [answers, setAnswers] = useState([]);
-    const { token, login, logout } = useAuth();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -24,10 +23,14 @@ const Quiz = ({ roomName }) => {
     const [messages, setMessages] = useState([]);
     const [message, setMessage] = useState('');
 
+    const [showingCorrectAnswer, setShowingCorrectAnswer] = useState(false);
+
+    const [userSelectedOptions, setUserSelectedOptions] = useState([]);
+
 
     useEffect(() => {
         const fetchMessages = async () => {
-            const result = await axios.get('http://localhost:8000/messages/');
+            const result = await axios.get(`http://localhost:8000/messages/${roomName}`);
             setMessages(result.data);
         };
     
@@ -48,7 +51,28 @@ const Quiz = ({ roomName }) => {
         }
     };
 
+    const submitUserAnswer = async (selectedOption) => {
+        try {
+            const now = new Date();
+            const submission = {
+                username: username,
+                room_name: roomName,
+                question_name: questions[currentQuestionIndex].question,
+                selected_option: selectedOption,
+                is_correct: questions[currentQuestionIndex].correct_answer === selectedOption,
+                submitted_at: now
+            };
+            console.log(submission)
+
+            const response = await axios.post('http://localhost:8000/submissions/', submission);
+            console.log('Submission response:', response.data);
+        } catch (error) {
+            console.error('Error submitting answer:', error);
+        }
+    };
+
     useEffect(() => {
+        const token = localStorage.getItem('access_token');
         const fetchData = async () => {
             if (token) {
                 try {
@@ -83,7 +107,7 @@ const Quiz = ({ roomName }) => {
         };
 
         fetchData();
-    }, [token, roomName]);
+    }, [roomName]);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -103,6 +127,7 @@ const Quiz = ({ roomName }) => {
                 }
             };
 
+            const token = localStorage.getItem('access_token');
             axios.get(`https://contestsystembackend.onrender.com/rooms/${roomName}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
@@ -125,6 +150,20 @@ const Quiz = ({ roomName }) => {
     }, [isAuthenticated, username, roomName]);
 
     const handleAnswerOptionClick = async (selectedOption) => {
+        setShowingCorrectAnswer(true);
+        setTimeLeft(10);
+
+        setUserSelectedOptions(prevOptions => [
+            ...prevOptions, 
+            { 
+                questionIndex: questions[currentQuestionIndex].question,
+                selectedOption: selectedOption,
+                correctOption: questions[currentQuestionIndex].correct_answer
+            }
+        ]);
+
+        await submitUserAnswer(selectedOption);
+
         if (selectedOption === questions[currentQuestionIndex]?.correct_answer) {
             setScore(score + 1);
             const newRating = rating + 10;
@@ -148,13 +187,16 @@ const Quiz = ({ roomName }) => {
             }
         }
 
-        const nextQuestion = currentQuestionIndex + 1;
-        if (questions && nextQuestion < questions.length) {
-            setCurrentQuestionIndex(nextQuestion);
-            resetTimer();
-        } else {
-            setShowScore(true);
-        }
+        setTimeout(() => {
+            setShowingCorrectAnswer(false);
+            const nextQuestion = currentQuestionIndex + 1;
+            if (questions && nextQuestion < questions.length) {
+                setCurrentQuestionIndex(nextQuestion);
+                resetTimer();
+            } else {
+                setShowScore(true);
+            }
+        }, 2000);
     };
 
     const submitAnswer = () => {
@@ -162,10 +204,6 @@ const Quiz = ({ roomName }) => {
             ws.send(JSON.stringify({ answer, username, room_name: roomName }));
             setAnswer('');
         }
-    };
-
-    const handleLogin = async () => {
-        await login(username, password);
     };
 
     useEffect(() => {
@@ -193,7 +231,11 @@ const Quiz = ({ roomName }) => {
             }, 1000);
             return () => clearTimeout(timerId);
         } else {
-            handleNextQuestion();
+            setShowingCorrectAnswer(true);
+            setTimeout(() => {
+                setShowingCorrectAnswer(false);
+                handleNextQuestion();
+            }, 5000);
         }
     }, [timeLeft]);
 
@@ -212,31 +254,18 @@ const Quiz = ({ roomName }) => {
         }
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('access_token');
+        setIsAuthenticated(false);
+        setUsername('');
+    };
+
     return (
         <div className="p-4 bg-white rounded-lg shadow-md">
             <h1 className="text-2xl font-bold mb-4">Quiz Component {rating}</h1>
             {!isAuthenticated ? (
                 <div className="mb-4">
-                    <input 
-                        type="text" 
-                        placeholder="Username" 
-                        value={username} 
-                        onChange={(e) => setUsername(e.target.value)} 
-                        className="w-full p-2 mb-2 border border-gray-300 rounded"
-                    />
-                    <input 
-                        type="password" 
-                        placeholder="Password" 
-                        value={password} 
-                        onChange={(e) => setPassword(e.target.value)} 
-                        className="w-full p-2 mb-2 border border-gray-300 rounded"
-                    />
-                    <button 
-                        onClick={handleLogin} 
-                        className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                    >
-                        Login
-                    </button>
+                    <div>Please log in to access the quiz.</div>
                 </div>
             ) : (
                 <>
@@ -259,7 +288,7 @@ const Quiz = ({ roomName }) => {
                         Submit
                     </button>
                     <button 
-                        onClick={logout} 
+                        onClick={handleLogout} 
                         className="w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-4"
                     >
                         Logout
@@ -280,26 +309,38 @@ const Quiz = ({ roomName }) => {
                                         {questions[currentQuestionIndex]?.question}
                                     </div>
                                 </div>
-                                <div className="answer-section mb-4">
-                                    {questions[currentQuestionIndex]?.options.map((option, index) => (
-                                        <button
-                                            key={index}
-                                            onClick={() => handleAnswerOptionClick(option)}
-                                            className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2"
-                                        >
-                                            {option}
-                                        </button>
-                                    ))}
-                                </div>
-                                <div className="timer text-lg font-semibold mb-2">
-                                    Time left: {timeLeft} seconds
-                                </div>
+                        <div className="answer-section mb-4">
+                            {questions[currentQuestionIndex]?.options.map((option, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => handleAnswerOptionClick(option)}
+                                    className={`w-full font-bold py-2 px-4 rounded mb-2 ${
+                                        showingCorrectAnswer
+                                            ? option === questions[currentQuestionIndex].correct_answer
+                                                ? 'bg-green-500 text-white'
+                                                : 'bg-red-500 text-white'
+                                            : 'bg-blue-500 hover:bg-blue-700 text-white'
+                                    }`}
+                                    disabled={showingCorrectAnswer}
+                                >
+                                    {option}
+                                </button>
+                            ))}
+                        </div>
+                        {showingCorrectAnswer && (
+                            <div className="correct-answer text-lg font-semibold mb-2 text-green-600">
+                                Correct Answer: {questions[currentQuestionIndex].correct_answer}
+                            </div>
+                        )}
+                        {!showingCorrectAnswer && (
+                            <div className="timer text-lg font-semibold mb-2">
+                                Time left: {timeLeft} seconds
+                            </div>
+                        )}
                             </>
                         )
                     )}
-                </>
-            )}
-            <div className="chat-section">
+                    <div className="chat-section">
                 <h2 className="text-xl font-semibold mb-4">Chat</h2>
                 <div className="messages mb-4">
                 <List>
@@ -334,6 +375,8 @@ const Quiz = ({ roomName }) => {
                     </Button>
                 </div>
             </div>
+                </>
+            )}
         </div>
     );
 };
