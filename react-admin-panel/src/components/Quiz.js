@@ -2,8 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 import { TextField, Button, List, ListItem, ListItemText } from '@mui/material';
+import { useNavigate, useParams } from 'react-router-dom';
 
-const Quiz = ({ roomName }) => {
+
+const Quiz = () => {
+
+    const { roomName } = useParams();
+
     const [questions, setQuestions] = useState([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [score, setScore] = useState(0);
@@ -128,12 +133,16 @@ const Quiz = ({ roomName }) => {
             };
 
             const token = localStorage.getItem('access_token');
-            axios.get(`https://contestsystembackend.onrender.com/rooms/${roomName}`, {
+            axios.get(`http://localhost:8000/rooms/${roomName}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
                 .then(response => {
-                    console.log(response.data);
-                    setQuestions(response.data.contests.questions);
+                    console.log(response.data.contest_name);
+                    axios.get(`http://localhost:8000/supercontests/${response.data.contest_name}`)
+                    .then(res => {
+                    console.log(res.data);
+                    setQuestions(res.data.questions);
+                })
                 })
                 .catch(error => {
                     console.error("There was an error fetching the room!", error);
@@ -261,120 +270,131 @@ const Quiz = ({ roomName }) => {
     };
 
     return (
-        <div className="p-4 bg-white rounded-lg shadow-md">
-            <h1 className="text-2xl font-bold mb-4">Quiz Component {rating}</h1>
+        <div className="h-screen flex">
             {!isAuthenticated ? (
-                <div className="mb-4">
-                    <div>Please log in to access the quiz.</div>
+                <div className="w-full flex items-center justify-center">
+                    <div className="text-lg text-gray-700">Please log in to access the quiz.</div>
                 </div>
             ) : (
                 <>
-                    <div className="mb-4">
-                        <h2 className="text-xl font-semibold">Ratings</h2>
-                        <ul>
-                            {ratingList
-                                .sort((a, b) => b.rating - a.rating)
-                                .map((rating_item, index) => (
-                                    <li key={index} className="p-2 mb-2 bg-gray-100 rounded">
-                                        User: {rating_item.username}, Rating: {rating_item.rating}
-                                    </li>
-                                ))}
-                        </ul>
-                    </div>
-                    <button 
-                        onClick={submitAnswer} 
-                        className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4"
-                    >
-                        Submit
-                    </button>
-                    <button 
-                        onClick={handleLogout} 
-                        className="w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-4"
-                    >
-                        Logout
-                    </button>
-                    {showScore ? (
-                        <div className="score-section text-center text-xl font-bold">
-                            You scored {score} out of {questions?.length || 0}
-                        </div>
-                    ) : (
-                        questions?.length > 0 && (
-                            <>
-                                <div className="question-section mb-4">
-                                    <div className="question-count text-lg font-semibold mb-2">
-                                        <img src={questions[currentQuestionIndex]?.image_url} alt={questions[currentQuestionIndex]?.image_url} />
-                                        <span>Question {currentQuestionIndex + 1}/{questions.length}</span>
+                    {/* Left side - Tasks */}
+                    <div className="w-1/2 p-6 bg-white overflow-y-auto">
+                        <h1 className="text-3xl font-bold mb-6 text-indigo-600">Quiz Challenge</h1>
+                        {showScore ? (
+                            <div className="text-center text-2xl font-bold text-indigo-600 bg-indigo-100 p-6 rounded-lg">
+                                You scored {score} out of {questions?.length || 0}
+                            </div>
+                        ) : (
+                            questions?.length > 0 && (
+                                <div className="bg-gray-100 p-6 rounded-lg">
+                                    <div className="mb-6">
+                                        <div className="text-lg font-semibold mb-2 text-indigo-600">
+                                            Question {currentQuestionIndex + 1}/{questions.length}
+                                        </div>
+                                        {questions[currentQuestionIndex]?.image_url && (
+                                            <img 
+                                                src={questions[currentQuestionIndex].image_url} 
+                                                alt="Question" 
+                                                className="w-full max-h-64 object-contain mb-4 rounded-lg"
+                                            />
+                                        )}
+                                        <div className="text-xl font-semibold mb-4">
+                                            {questions[currentQuestionIndex]?.question}
+                                        </div>
                                     </div>
-                                    <div className="question-text text-lg font-semibold mb-2">
-                                        {questions[currentQuestionIndex]?.question}
+                                    <div className="space-y-3 mb-6">
+                                        {questions[currentQuestionIndex]?.options.map((option, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => handleAnswerOptionClick(option)}
+                                                className={`w-full py-3 px-4 rounded-lg font-medium transition duration-300 ${
+                                                    showingCorrectAnswer
+                                                        ? option === questions[currentQuestionIndex].correct_answer
+                                                            ? 'bg-green-500 text-white'
+                                                            : 'bg-red-500 text-white'
+                                                        : 'bg-white hover:bg-indigo-100 text-indigo-700'
+                                                }`}
+                                                disabled={showingCorrectAnswer}
+                                            >
+                                                {option}
+                                            </button>
+                                        ))}
                                     </div>
+                                    {showingCorrectAnswer && (
+                                        <div className="text-lg font-semibold mb-4 text-green-600 bg-green-100 p-3 rounded-lg">
+                                            Correct Answer: {questions[currentQuestionIndex].correct_answer}
+                                        </div>
+                                    )}
+                                    {!showingCorrectAnswer && (
+                                        <div className="text-lg font-semibold mb-4 text-indigo-600">
+                                            Time left: {timeLeft} seconds
+                                        </div>
+                                    )}
                                 </div>
-                        <div className="answer-section mb-4">
-                            {questions[currentQuestionIndex]?.options.map((option, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => handleAnswerOptionClick(option)}
-                                    className={`w-full font-bold py-2 px-4 rounded mb-2 ${
-                                        showingCorrectAnswer
-                                            ? option === questions[currentQuestionIndex].correct_answer
-                                                ? 'bg-green-500 text-white'
-                                                : 'bg-red-500 text-white'
-                                            : 'bg-blue-500 hover:bg-blue-700 text-white'
-                                    }`}
-                                    disabled={showingCorrectAnswer}
-                                >
-                                    {option}
-                                </button>
-                            ))}
+                            )
+                        )}
+                    </div>
+
+                    {/* Right side - Leaderboard and Chat */}
+                    <div className="w-1/2 flex flex-col">
+                        {/* Upper right - Leaderboard */}
+                        <div className="h-1/2 p-6 bg-gray-100 overflow-y-auto">
+                            <h2 className="text-2xl font-semibold mb-4 text-indigo-600">Leaderboard</h2>
+                            <ul className="space-y-2">
+                                {ratingList
+                                    .sort((a, b) => b.rating - a.rating)
+                                    .map((rating_item, index) => (
+                                        <li key={index} className="flex justify-between items-center p-3 bg-white rounded-md shadow">
+                                            <span className="font-medium">{rating_item.username}</span>
+                                            <span className="bg-indigo-100 text-indigo-800 py-1 px-3 rounded-full">{rating_item.rating}</span>
+                                        </li>
+                                    ))}
+                            </ul>
                         </div>
-                        {showingCorrectAnswer && (
-                            <div className="correct-answer text-lg font-semibold mb-2 text-green-600">
-                                Correct Answer: {questions[currentQuestionIndex].correct_answer}
+
+                        {/* Lower right - Chat */}
+                        <div className="h-1/2 p-6 bg-white flex flex-col">
+                            <h2 className="text-2xl font-semibold mb-4 text-indigo-600">Chat</h2>
+                            <div className="flex-grow bg-gray-100 rounded-lg p-4 mb-4 overflow-y-auto">
+                                <List>
+                                    {messages.map((msg, index) => (
+                                        <ListItem key={index} className="mb-2 bg-white rounded-lg shadow-sm">
+                                            <ListItemText 
+                                                primary={msg.username} 
+                                                secondary={msg.content}
+                                                primaryTypographyProps={{ className: "font-semibold text-indigo-600" }}
+                                                secondaryTypographyProps={{ className: "text-gray-700" }}
+                                            />
+                                        </ListItem>
+                                    ))}
+                                </List>
                             </div>
-                        )}
-                        {!showingCorrectAnswer && (
-                            <div className="timer text-lg font-semibold mb-2">
-                                Time left: {timeLeft} seconds
+                            <div className="flex space-x-2">
+                                <TextField
+                                    label="Message"
+                                    variant="outlined"
+                                    fullWidth
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                    onKeyPress={(e) => {
+                                        if (e.key === 'Enter') {
+                                            handleSendMessage();
+                                            e.preventDefault();
+                                        }
+                                    }}
+                                    className="bg-white"
+                                />
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={handleSendMessage}
+                                    className="bg-indigo-600 hover:bg-indigo-700"
+                                >
+                                    Send
+                                </Button>
                             </div>
-                        )}
-                            </>
-                        )
-                    )}
-                    <div className="chat-section">
-                <h2 className="text-xl font-semibold mb-4">Chat</h2>
-                <div className="messages mb-4">
-                <List>
-                    {messages.map((msg, index) => (
-                        <ListItem key={index}>
-                            <ListItemText primary={`${msg.username}: ${msg.content}`} />
-                        </ListItem>
-                    ))}
-                </List>
-                </div>
-                <div className="send-message">
-                    <TextField
-                        label="Message"
-                        variant="outlined"
-                        fullWidth
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                                handleSendMessage();
-                                e.preventDefault();
-                            }
-                        }}
-                    />
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleSendMessage}
-                        className="mt-2"
-                    >
-                        Send
-                    </Button>
-                </div>
-            </div>
+                        </div>
+                    </div>
                 </>
             )}
         </div>

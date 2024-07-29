@@ -10,6 +10,7 @@ import TestRoom from './components/TestRoom';
 import Register from './components/Register';
 import UserLogin from './components/UserLogin';
 import { AuthProvider } from './components/AuthContext';
+import RoomCreatingForm from './components/RoomCreatingForm';
 
 
 
@@ -97,7 +98,7 @@ const AdminPanel = () => {
     formData.append('prompt', textInput);
     console.log(textInput);
 
-    const response = await fetch('https://contestsystembackend.onrender.com/aigen/', {
+    const response = await fetch('http://localhost:8000/aigen/', {
       method: 'POST',
       body: formData,
     });
@@ -123,14 +124,14 @@ const AdminPanel = () => {
     }
 
     setLoading(false);
-    setMessage('Готов к созданию формы');
+    setMessage('Success');
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
       {token ? (
         <>
-          <RoomList onSelectRoom={handleSelectRoom} />
+          <RoomCreatingForm onSelectRoom={handleSelectRoom} />
           <ContestForm />
           <h2 className="text-2xl font-semibold mb-4 text-center">AI</h2>
           <div

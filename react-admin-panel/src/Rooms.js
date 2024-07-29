@@ -3,8 +3,8 @@ import axios from 'axios';
 import RoomList from './components/RoomList';
 import Quiz from './components/Quiz';
 import { AuthProvider } from './components/AuthContext';
-
-
+import { useNavigate } from 'react-router-dom'
+import SpecialPageRedirect from './components/SpecialPageRedirect';
 
 const Rooms = () => {
   const [username, setUsername] = useState('');
@@ -12,8 +12,10 @@ const Rooms = () => {
   const [token, setToken] = useState('');
   const [roomName, setRoomName] = useState('');
   const [enteredRoom, setEnteredRoom] = useState(false);
+  const navigate = useNavigate();
 
   const handleSelectRoom = (room) => {
+    navigate(`/special/${room}`);
     setRoomName(room);
     setEnteredRoom(true);
   };
@@ -23,7 +25,6 @@ const Rooms = () => {
       console.log('Success!');
     }
   }, [token]);
-
 
   const login = async () => {
     try {
@@ -46,7 +47,9 @@ const Rooms = () => {
       ) : (
         <div>
           <AuthProvider>
-            <Quiz roomName={roomName} />
+            <SpecialPageRedirect>
+              <Quiz roomName={roomName} />
+            </SpecialPageRedirect>
           </AuthProvider>
         </div>
       )}

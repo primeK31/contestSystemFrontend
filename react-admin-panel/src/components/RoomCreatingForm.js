@@ -1,29 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { List, ListItem, ListItemText, Button, TextField } from '@mui/material';
-import Heads from './Heads.js';
-import Foots from './Foots.js';
+import ContestForm from './ContestForm';
 
-const RoomList = ({ onSelectRoom }) => {
+const RoomCreatingForm = ({ onSelectRoom }) => {
   const [rooms, setRooms] = useState([]);
   const [newRoomName, setNewRoomName] = useState('');
-  const [newRoomContests, setNewRoomContests] = useState('');
   const [contests, setContests] = useState([]);
-  const [loadingContests, setLoadingContests] = useState(false);
-  const [selectedContest, setSelectedContest] = useState('');
-  const [contestJson, setContestJson] = useState([]);
-  const [rating, setRating] = useState([]);
+  const [selectedContestId, setSelectedContestId] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [startTime, setStartTime] = useState('');
 
-
+  
   useEffect(() => {
     const fetchRooms = async () => {
-      const response = await axios.get('https://contestsystembackend.onrender.com/rooms/');
+      const response = await axios.get('http://localhost:8000/rooms/');
       setRooms(response.data);
     };
     const fetchContests = async () => {
-      const response = await axios.get('https://contestsystembackend.onrender.com/supercontests/');
-      // const response = await axios.get('http://localhost:8000/supercontests/');
-      console.log(response.data);
+      const response = await axios.get('http://localhost:8000/supercontests/');
       setContests(response.data);
     };
 
@@ -32,65 +26,120 @@ const RoomList = ({ onSelectRoom }) => {
   }, []);
 
   const createRoom = async () => {
-    if (newRoomName && selectedContest) {
-      console.log(newRoomName);
-      console.log(contestJson);
-      await axios.post('https://contestsystembackend.onrender.com/rooms/', {
+    if (newRoomName && selectedContestId && startDate && startTime) {
+      const startDateTime = new Date(`${startDate}T${startTime}`);
+      const roomData = {
         name: newRoomName,
-        contests: contestJson,
-      });
-      setRooms([...rooms, { name: newRoomName, contests: contestJson }]);
-      setNewRoomName('');
-      setNewRoomContests('');
+        contest_name: selectedContestId,  // Send contest ID instead of the whole object
+        start_time: startDateTime.toISOString()
+      };
+
+      try {
+        console.log(roomData);
+        const response = await axios.post('http://localhost:8000/rooms/', roomData);
+        setRooms([...rooms, response.data]);
+        setNewRoomName('');
+        setSelectedContestId('');
+        setStartDate('');
+        setStartTime('');
+      } catch (error) {
+        console.error('Error creating room:', error);
+      }
     }
   };
 
-
-  const handleSelect = (event) => {
-    setContestJson(contests.find(c => c.name === event.target.value));
-    setSelectedContest(event.target.value);
+  const handleContestCreated = (newContest) => {
+    setContests([...contests, newContest]);
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <ul className="mb-4">
-        {rooms.map((room, index) => (
-          <li 
-            key={index} 
-            className="p-2 mb-2 bg-gray-100 rounded cursor-pointer hover:bg-gray-200" 
-            onClick={() => onSelectRoom(room.name)}
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+      <h2 className="text-3xl font-bold mb-6 text-gray-800">Create Room</h2>
+      
+      {rooms.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold mb-3 text-gray-700">Existing Rooms</h3>
+          <ul className="space-y-2">
+            {rooms.map((room) => (
+              <li 
+                key={room.id} 
+                className="p-3 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200 transition duration-150 ease-in-out"
+                onClick={() => onSelectRoom(room.name)}
+              >
+                {room.name}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="space-y-4 mb-6">
+        <div>
+          <label htmlFor="roomName" className="block text-sm font-medium text-gray-700 mb-1">Room Name</label>
+          <input
+            id="roomName"
+            type="text"
+            placeholder="Enter room name"
+            value={newRoomName}
+            onChange={(e) => setNewRoomName(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="contestSelect" className="block text-sm font-medium text-gray-700 mb-1">Select Contest</label>
+          <select 
+            id="contestSelect"
+            value={selectedContestId}
+            onChange={(e) => setSelectedContestId(e.target.value)} 
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
           >
-            {room.name}
-          </li>
-        ))}
-      </ul>
-      <input
-        type="text"
-        placeholder="New Room Name"
-        value={newRoomName}
-        onChange={(e) => setNewRoomName(e.target.value)}
-        className="w-full p-2 mb-2 border border-gray-300 rounded"
-      />
-      <select 
-        value={selectedContest} 
-        onChange={handleSelect} 
-        className="w-full p-2 mb-4 border border-gray-300 rounded"
-      >
-        <option value="">Select a contest</option>
-        {contests.map((contest, index) => (
-          <option key={index} value={contest.name}>
-            {contest.name}
-          </option>
-        ))}
-      </select>
+            <option value="">Select a contest</option>
+            {contests.map((contest) => (
+              <option key={contest.id} value={contest.id}>
+                {contest.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex space-x-4">
+          <div className="flex-1">
+            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+            <input
+              id="startDate"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div className="flex-1">
+            <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+            <input
+              id="startTime"
+              type="time"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+      </div>
+
       <button 
         onClick={createRoom} 
-        className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out"
       >
         Create Room
       </button>
+
+      <div className="mt-12">
+        <h2 className="text-2xl font-bold mb-4 text-gray-800">Create New Contest</h2>
+        <ContestForm onContestCreated={handleContestCreated} />
+      </div>
     </div>
   );
 };
 
-export default RoomList;
+export default RoomCreatingForm;

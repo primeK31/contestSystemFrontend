@@ -71,8 +71,9 @@ const App = () => {
           />
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path='/rooms' element={<Rooms />} />
+          <Route path="/rooms/:roomName" element={<Quiz />} />
           <Route path='/timer' element={<Timer />} />
-          <Route path='/special' element={<SpecialPageRedirect/>} />
+          <Route path="/special/:roomName" element={<SpecialPageRedirect/>} />
         </Routes>
       <Foots />
     </div>

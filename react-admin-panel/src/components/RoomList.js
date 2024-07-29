@@ -1,29 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { List, ListItem, ListItemText, Button, TextField } from '@mui/material';
-import Heads from './Heads.js';
-import Foots from './Foots.js';
 
 const RoomList = ({ onSelectRoom }) => {
   const [rooms, setRooms] = useState([]);
-  const [newRoomName, setNewRoomName] = useState('');
-  const [newRoomContests, setNewRoomContests] = useState('');
   const [contests, setContests] = useState([]);
-  const [loadingContests, setLoadingContests] = useState(false);
-  const [selectedContest, setSelectedContest] = useState('');
-  const [contestJson, setContestJson] = useState([]);
-  const [rating, setRating] = useState([]);
-
 
   useEffect(() => {
     const fetchRooms = async () => {
-      const response = await axios.get('https://contestsystembackend.onrender.com/rooms/');
+      const response = await axios.get('http://localhost:8000/rooms/');
       setRooms(response.data);
     };
     const fetchContests = async () => {
       const response = await axios.get('https://contestsystembackend.onrender.com/supercontests/');
-      // const response = await axios.get('http://localhost:8000/supercontests/');
-      console.log(response.data);
       setContests(response.data);
     };
 
@@ -31,64 +19,42 @@ const RoomList = ({ onSelectRoom }) => {
     fetchContests();
   }, []);
 
-  const createRoom = async () => {
-    if (newRoomName && selectedContest) {
-      console.log(newRoomName);
-      console.log(contestJson);
-      await axios.post('https://contestsystembackend.onrender.com/rooms/', {
-        name: newRoomName,
-        contests: contestJson,
-      });
-      setRooms([...rooms, { name: newRoomName, contests: contestJson }]);
-      setNewRoomName('');
-      setNewRoomContests('');
-    }
+  const getContestName = (contestId) => {
+    const contest = contests.find(c => c.id === contestId);
+    return contest ? contest.name : 'Unknown Contest';
   };
 
-
-  const handleSelect = (event) => {
-    setContestJson(contests.find(c => c.name === event.target.value));
-    setSelectedContest(event.target.value);
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
-      <ul className="mb-4">
-        {rooms.map((room, index) => (
-          <li 
-            key={index} 
-            className="p-2 mb-2 bg-gray-100 rounded cursor-pointer hover:bg-gray-200" 
-            onClick={() => onSelectRoom(room.name)}
-          >
-            {room.name}
-          </li>
-        ))}
-      </ul>
-      <input
-        type="text"
-        placeholder="New Room Name"
-        value={newRoomName}
-        onChange={(e) => setNewRoomName(e.target.value)}
-        className="w-full p-2 mb-2 border border-gray-300 rounded"
-      />
-      <select 
-        value={selectedContest} 
-        onChange={handleSelect} 
-        className="w-full p-2 mb-4 border border-gray-300 rounded"
-      >
-        <option value="">Select a contest</option>
-        {contests.map((contest, index) => (
-          <option key={index} value={contest.name}>
-            {contest.name}
-          </option>
-        ))}
-      </select>
-      <button 
-        onClick={createRoom} 
-        className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Create Room
-      </button>
+      <h2 className="text-2xl font-bold mb-4 text-gray-800">Available Rooms</h2>
+      {rooms.length === 0 ? (
+        <p className="text-gray-600">No rooms available at the moment.</p>
+      ) : (
+        <ul className="space-y-4">
+          {rooms.map((room) => (
+            <li
+              key={room.id}
+              className="p-4 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200 transition duration-150 ease-in-out"
+              onClick={() => onSelectRoom(room.name)}
+            >
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-gray-800">{room.name}</h3>
+                <span className="text-sm text-gray-600">
+                  Starts: {formatDate(room.start_time)} UTC+00:00
+                </span>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">
+                Contest: {getContestName(room.contests)}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
