@@ -7,7 +7,7 @@ const TestRoom = ({ roomId }) => {
   const [answers, setAnswers] = useState([]);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/ws/${roomId}`);
+    const socket = new WebSocket(`wss://contestsystembackend.onrender.com/ws/${roomId}`);
     setWs(socket);
 
     socket.onmessage = (event) => {

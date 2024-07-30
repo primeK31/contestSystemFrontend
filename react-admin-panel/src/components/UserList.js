@@ -7,7 +7,7 @@ const UserList = () => {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const response = await axios.get('http://localhost:8000/users/');
+      const response = await axios.get('https://contestsystembackend.onrender.com/users/');
       setUsers(response.data);
     };
     fetchUsers();

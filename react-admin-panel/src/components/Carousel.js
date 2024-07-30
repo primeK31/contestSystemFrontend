@@ -17,7 +17,7 @@ const Carousel = ({ items }) => {
     <div className="justify-center items-center">
       <Slider {...settings}>
         {items.map((item, index) => (
-          <div key={index} className="px-2"> {/* Add horizontal padding to create spacing */}
+          <div key={index} className="px-2"> {}
             <div className="w-full flex justify-center items-center h-48">
               {item}
             </div>

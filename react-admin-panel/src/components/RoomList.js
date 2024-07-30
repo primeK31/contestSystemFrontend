@@ -7,7 +7,7 @@ const RoomList = ({ onSelectRoom }) => {
 
   useEffect(() => {
     const fetchRooms = async () => {
-      const response = await axios.get('http://localhost:8000/rooms/');
+      const response = await axios.get('https://contestsystembackend.onrender.com/rooms/');
       setRooms(response.data);
     };
     const fetchContests = async () => {

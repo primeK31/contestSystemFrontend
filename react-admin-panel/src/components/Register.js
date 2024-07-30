@@ -20,7 +20,7 @@ const Register = () => {
         email,
         password,
       });
-      //setMessage(response.data.msg);
+      // setMessage(response.data.msg);
     } catch (error) {
       setMessage("Registration error");
     }
@@ -68,6 +68,7 @@ const Register = () => {
           >
             Register
           </button>
+          <a href="/login" className="py-10 underline text-blue-500">Already have an account?</a>
         </form>
         {message && <p className="mt-4 text-center text-red-500">{message}</p>}
       </div>

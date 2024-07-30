@@ -1,4 +1,3 @@
-// src/components/QuestionForm.js
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -39,7 +38,7 @@ const QuestionForm = () => {
         // Upload image if present
         const formData = new FormData();
         formData.append('file', file);
-        const uploadResponse = await axios.post('http://localhost:8000/uploadimage/', formData, {
+        const uploadResponse = await axios.post('https://contestsystembackend.onrender.com/uploadimage/', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -48,7 +47,7 @@ const QuestionForm = () => {
       }
 
       // Create question
-      const response = await axios.post('http://localhost:8000/questions/', {
+      const response = await axios.post('https://contestsystembackend.onrender.com/questions/', {
         ...questionData,
         image_url: imageUrl,
       });

@@ -13,8 +13,8 @@ const SpecialPageRedirect = () => {
   const fetchBackendTime = useCallback(async () => {
     try {
       console.log(roomName);
-      const response = await fetch(`http://localhost:8000/rooms/${roomName}`);
-      const lol = await fetch(`http://localhost:8000/server-time`);
+      const response = await fetch(`https://contestsystembackend.onrender.com/rooms/${roomName}`);
+      const lol = await fetch(`https://contestsystembackend.onrender.com/server-time`);
       const lol_data = await lol.json();
       const data = await response.json();
       setBackendTime(new Date(data.start_time));

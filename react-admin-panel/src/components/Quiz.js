@@ -32,10 +32,12 @@ const Quiz = () => {
 
     const [userSelectedOptions, setUserSelectedOptions] = useState([]);
 
+    
+
 
     useEffect(() => {
         const fetchMessages = async () => {
-            const result = await axios.get(`http://localhost:8000/messages/${roomName}`);
+            const result = await axios.get(`https://contestsystembackend.onrender.com/messages/${roomName}`);
             setMessages(result.data);
         };
     
@@ -51,7 +53,7 @@ const Quiz = () => {
             };
             console.log(msg);
             console.log(JSON.stringify(msg));
-            await axios.post('http://localhost:8000/messages/', msg);
+            await axios.post('https://contestsystembackend.onrender.com/messages/', msg);
             setMessage('');
         }
     };
@@ -69,7 +71,7 @@ const Quiz = () => {
             };
             console.log(submission)
 
-            const response = await axios.post('http://localhost:8000/submissions/', submission);
+            const response = await axios.post('https://contestsystembackend.onrender.com/submissions/', submission);
             console.log('Submission response:', response.data);
         } catch (error) {
             console.error('Error submitting answer:', error);
@@ -116,7 +118,7 @@ const Quiz = () => {
 
     useEffect(() => {
         if (isAuthenticated) {
-            const socket = new WebSocket(`ws://localhost:8000/ws/room/${roomName}/user/${username}`);
+            const socket = new WebSocket(`wss://contestsystembackend.onrender.com/ws/room/${roomName}/user/${username}`);
             setWs(socket);
 
             socket.onmessage = (event) => {
@@ -133,12 +135,12 @@ const Quiz = () => {
             };
 
             const token = localStorage.getItem('access_token');
-            axios.get(`http://localhost:8000/rooms/${roomName}`, {
+            axios.get(`https://contestsystembackend.onrender.com/rooms/${roomName}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
                 .then(response => {
                     console.log(response.data.contest_name);
-                    axios.get(`http://localhost:8000/supercontests/${response.data.contest_name}`)
+                    axios.get(`https://contestsystembackend.onrender.com/supercontests/${response.data.contest_name}`)
                     .then(res => {
                     console.log(res.data);
                     setQuestions(res.data.questions);
@@ -159,9 +161,6 @@ const Quiz = () => {
     }, [isAuthenticated, username, roomName]);
 
     const handleAnswerOptionClick = async (selectedOption) => {
-        setShowingCorrectAnswer(true);
-        setTimeLeft(10);
-
         setUserSelectedOptions(prevOptions => [
             ...prevOptions, 
             { 
@@ -177,6 +176,7 @@ const Quiz = () => {
             setScore(score + 1);
             const newRating = rating + 10;
             setRating(newRating);
+            setShowingCorrectAnswer(true);
 
             try {
                 await axios.put('https://contestsystembackend.onrender.com/update_rating/', {
@@ -195,17 +195,6 @@ const Quiz = () => {
                 console.error('Error updating rating:', error);
             }
         }
-
-        setTimeout(() => {
-            setShowingCorrectAnswer(false);
-            const nextQuestion = currentQuestionIndex + 1;
-            if (questions && nextQuestion < questions.length) {
-                setCurrentQuestionIndex(nextQuestion);
-                resetTimer();
-            } else {
-                setShowScore(true);
-            }
-        }, 2000);
     };
 
     const submitAnswer = () => {
@@ -217,21 +206,19 @@ const Quiz = () => {
 
     useEffect(() => {
         if (currentQuestionIndex < questions.length) {
-            timerRef.current = setTimeout(() => {
-                const nextQuestion = currentQuestionIndex + 1;
-                if (questions && nextQuestion < questions.length) {
-                    setCurrentQuestionIndex(nextQuestion);
-                    resetTimer();
-                } else {
-                    setShowScore(true);
-                }
-            }, 10000);
-
-            return () => {
-                clearTimeout(timerRef.current);
-            };
+            if (timeLeft > 0) {
+                const timerId = setTimeout(() => {
+                    setTimeLeft(timeLeft - 1);
+                }, 1000);
+                return () => clearTimeout(timerId);
+            } else if (!showingCorrectAnswer) {
+                setShowingCorrectAnswer(true);
+                setTimeout(() => {
+                    handleNextQuestion();
+                }, 5000);
+            }
         }
-    }, [currentQuestionIndex, questions.length]);
+    }, [timeLeft, currentQuestionIndex, questions.length, showingCorrectAnswer]);
 
     useEffect(() => {
         if (timeLeft > 0) {
@@ -253,16 +240,15 @@ const Quiz = () => {
     };
 
     const handleNextQuestion = () => {
-        clearTimeout(timerRef.current);
+        setShowingCorrectAnswer(false);
         const nextQuestion = currentQuestionIndex + 1;
         if (questions && nextQuestion < questions.length) {
             setCurrentQuestionIndex(nextQuestion);
-            resetTimer();
+            setTimeLeft(20);
         } else {
             setShowScore(true);
         }
     };
-
     const handleLogout = () => {
         localStorage.removeItem('access_token');
         setIsAuthenticated(false);
@@ -325,11 +311,9 @@ const Quiz = () => {
                                             Correct Answer: {questions[currentQuestionIndex].correct_answer}
                                         </div>
                                     )}
-                                    {!showingCorrectAnswer && (
-                                        <div className="text-lg font-semibold mb-4 text-indigo-600">
-                                            Time left: {timeLeft} seconds
-                                        </div>
-                                    )}
+                                    <div className="text-lg font-semibold mb-4 text-indigo-600">
+                                        Time left: {timeLeft} seconds
+                                    </div>
                                 </div>
                             )
                         )}

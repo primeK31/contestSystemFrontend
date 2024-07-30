@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ContestForm from './components/ContestForm';
 import axios from 'axios';
-import { Route, Routes } from 'react-router-dom';
-import User from './components/User'
-import { TextField, Button } from '@mui/material';
-import RoomList from './components/RoomList';
-import Quiz from './components/Quiz';
-import TestRoom from './components/TestRoom';
-import Register from './components/Register';
-import UserLogin from './components/UserLogin';
-import { AuthProvider } from './components/AuthContext';
 import RoomCreatingForm from './components/RoomCreatingForm';
 
 
@@ -94,11 +85,23 @@ const AdminPanel = () => {
 
   const onFileUpload = async () => {
     setLoading(true);
+    const form = new FormData();
+    form.append('file', selectedFile);
+
+    
+    const compl = await fetch('https://contestsystembackend.onrender.com/uploadimage/', {
+      method: 'POST',
+      body: form,
+    });
+
+    const get = await compl.json();
+
     const formData = new FormData();
+    formData.append('file_name', get.file_url);
     formData.append('prompt', textInput);
     console.log(textInput);
 
-    const response = await fetch('http://localhost:8000/aigen/', {
+    const response = await fetch('https://contestsystembackend.onrender.com/aigen/', {
       method: 'POST',
       body: formData,
     });

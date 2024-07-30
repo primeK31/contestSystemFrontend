@@ -8,7 +8,7 @@ const CreateUser = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    await axios.post('http://localhost:8000/users/', { username, email });
+    await axios.post('https://contestsystembackend.onrender.com/users/', { username, email });
     setUsername('');
     setEmail('');
   };

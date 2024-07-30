@@ -10,7 +10,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8000/token_user', {
+      const response = await axios.post('https://contestsystembackend.onrender.com/token_user', {
         username,
         password,
       }, {
@@ -21,7 +21,6 @@ function Login() {
       navigate('/dashboard');
     } catch (error) {
       console.error('Login failed:', error);
-      // You might want to add some user feedback here
     }
   };
 
@@ -74,7 +73,7 @@ function Login() {
             >
               Sign in
             </button>
-            <a href="/register" className="py-10 underline text-blue-500">Don't have a account?</a>
+            <a href="/register" className="py-10 underline text-blue-500">Don't have an account?</a>
           </div>
         </form>
       </div>

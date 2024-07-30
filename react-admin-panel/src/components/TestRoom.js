@@ -13,7 +13,7 @@ const TestRoom = ({ roomName }) => {
 
   useEffect(() => {
     if (token) {
-        axios.get("http://localhost:8000/users/me", {
+        axios.get("https://contestsystembackend.onrender.com/users/me", {
             headers: { Authorization: `Bearer ${token}` }
         }).then(response => {
             setUsername(response.data.username);
@@ -26,7 +26,7 @@ const TestRoom = ({ roomName }) => {
 
   useEffect(() => {
     if (username && isAuthenticated) {
-      const socket = new WebSocket(`ws://localhost:8000/ws/room/${roomName}/user/${username}`);
+      const socket = new WebSocket(`wss://contestsystembackend.onrender.com/ws/room/${roomName}/user/${username}`);
       setWs(socket);
 
       socket.onmessage = (event) => {

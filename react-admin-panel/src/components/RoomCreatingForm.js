@@ -13,11 +13,11 @@ const RoomCreatingForm = ({ onSelectRoom }) => {
   
   useEffect(() => {
     const fetchRooms = async () => {
-      const response = await axios.get('http://localhost:8000/rooms/');
+      const response = await axios.get('https://contestsystembackend.onrender.com/rooms/');
       setRooms(response.data);
     };
     const fetchContests = async () => {
-      const response = await axios.get('http://localhost:8000/supercontests/');
+      const response = await axios.get('https://contestsystembackend.onrender.com/supercontests/');
       setContests(response.data);
     };
 
@@ -36,7 +36,7 @@ const RoomCreatingForm = ({ onSelectRoom }) => {
 
       try {
         console.log(roomData);
-        const response = await axios.post('http://localhost:8000/rooms/', roomData);
+        const response = await axios.post('https://contestsystembackend.onrender.com/rooms/', roomData);
         setRooms([...rooms, response.data]);
         setNewRoomName('');
         setSelectedContestId('');

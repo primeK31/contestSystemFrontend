@@ -2,8 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 function Heads() {
-  // Assume we have a way to get the current user's username
-  // This could be from a context, state management library, or localStorage
+
+  
   const username = localStorage.getItem('username');
 
   return (
@@ -23,7 +23,7 @@ function Heads() {
               strokeLinejoin="round"
               className="h-6 w-6"
             />
-            <span className="font-bold">Quiz Generator</span>
+            <span className="font-bold">SolvMaster</span>
           </Link>
           <nav className="hidden space-x-4 md:flex">
             <Link className="hover:text-primary-foreground/80 transition-colors" to="/">

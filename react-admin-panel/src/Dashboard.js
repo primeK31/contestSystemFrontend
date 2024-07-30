@@ -10,7 +10,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/users/me', {
+        const response = await axios.get('https://contestsystembackend.onrender.com/users/me', {
           headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
         });
         setUser(response.data);
@@ -27,7 +27,7 @@ export default function Dashboard() {
     const fetchStat = async () => {
       if (user) {
         try {
-          const response = await axios.get(`http://localhost:8000/statistics/${user.username}`);
+          const response = await axios.get(`https://contestsystembackend.onrender.com/statistics/${user.username}`);
           setStat(response.data);
           console.log(response.data);
         } catch(error) {

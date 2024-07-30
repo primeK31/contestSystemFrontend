@@ -10,7 +10,7 @@ function App() {
 
     const register = async () => {
         try {
-            await axios.post("http://localhost:8000/register", { username, password });
+            await axios.post("https://contestsystembackend.onrender.com/register", { username, password });
             setMessage("Registration successful");
         } catch (error) {
             setMessage("Registration failed");
@@ -19,7 +19,7 @@ function App() {
 
     const login = async () => {
         try {
-            const response = await axios.post("http://localhost:8000/token_user", new URLSearchParams({ username, password }));
+            const response = await axios.post("https://contestsystembackend.onrender.com/token_user", new URLSearchParams({ username, password }));
             setToken(response.data.access_token);
             setMessage("Login successful");
         } catch (error) {
@@ -30,7 +30,7 @@ function App() {
     const getProfile = async () => {
         try {
             console.log(token);
-            const response = await axios.get("http://localhost:8000/users/me", {
+            const response = await axios.get("https://contestsystembackend.onrender.com/users/me", {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setMessage(`Hello ${response.data.username}`);
