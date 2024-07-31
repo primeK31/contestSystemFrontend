@@ -124,7 +124,7 @@ function Home() {
                 <path d="M10.4 12.6a2 2 0 1 1 3 3L8 21l-4 1 1-4Z"></path>
               </svg>
               <h3 className="text-xl font-bold text-foreground">Go to the rooms</h3>
-              <p className="text-muted-foreground">And select</p>
+              <p className="text-muted-foreground">Select room and start solving!</p>
             </div>
             <div className="space-y-2">
               <svg
@@ -141,9 +141,9 @@ function Home() {
               >
                 <path d="M20 6 9 17l-5-5"></path>
               </svg>
-              <h3 className="text-xl font-bold text-foreground">Start solving!</h3>
+              <h3 className="text-xl font-bold text-foreground">Enjoy!</h3>
               <p className="text-muted-foreground">
-                And you also can have competition with your friends
+                You can have competition and chat with your friends learn new things and get analytics of your submissions in your profile.
               </p>
             </div>
           </div>

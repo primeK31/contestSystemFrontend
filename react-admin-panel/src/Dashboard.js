@@ -130,7 +130,10 @@ export default function Dashboard() {
                   <span className="absolute text-2xl font-bold text-blue-600">{correctPercentage}%</span>
                 </div>
                 <p className="mt-2 text-sm text-gray-500 text-center">Correct Percentage</p>
-                {isCommentLoading ? (
+              </div>
+            </div>
+          </div>
+          {isCommentLoading ? (
                   <div className="mt-4 p-4 bg-gray-50 rounded-lg flex justify-center items-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                   </div>
@@ -138,10 +141,7 @@ export default function Dashboard() {
                   <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                     <ReactMarkdown>{comment}</ReactMarkdown>
                   </div>
-                ) : null}
-              </div>
-            </div>
-          </div>
+          ) : null}
           {stat.total_submissions === 0 && (
             <div className="mt-6 text-center text-gray-500">
               <p>You haven't made any submissions yet. Start participating in quizzes to see your statistics!</p>
