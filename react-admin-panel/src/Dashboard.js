@@ -32,6 +32,12 @@ export default function Dashboard() {
           console.log(response.data);
         } catch(error) {
           console.error('Failed to get user statistics: ', error);
+          // Set default stats if there's an error (likely no submissions)
+          setStat({
+            total_submissions: 0,
+            correct_submissions: 0,
+            correct_percentage: 0
+          });
         }
       }
     };
@@ -106,6 +112,11 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+          {stat.total_submissions === 0 && (
+            <div className="mt-6 text-center text-gray-500">
+              <p>You haven't made any submissions yet. Start participating in quizzes to see your statistics!</p>
+            </div>
+          )}
         </div>
         <div className="px-4 py-4 sm:px-6 bg-gray-50">
           <button

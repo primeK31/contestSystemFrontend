@@ -256,44 +256,43 @@ const Quiz = () => {
     };
 
     return (
-        <div className="h-screen flex">
+        <div className="min-h-screen flex flex-col md:flex-row">
             {!isAuthenticated ? (
-                <div className="w-full flex items-center justify-center">
+                <div className="w-full flex items-center justify-center p-4">
                     <div className="text-lg text-gray-700">Please log in to access the quiz.</div>
                 </div>
             ) : (
                 <>
-                    {/* Left side - Tasks */}
-                    <div className="w-1/2 p-6 bg-white overflow-y-auto">
-                        <h1 className="text-3xl font-bold mb-6 text-indigo-600">Quiz Challenge</h1>
+                    <div className="w-full md:w-1/2 p-4 bg-white overflow-y-auto">
+                        <h1 className="text-2xl md:text-3xl font-bold mb-4 text-indigo-600">Quiz Challenge</h1>
                         {showScore ? (
-                            <div className="text-center text-2xl font-bold text-indigo-600 bg-indigo-100 p-6 rounded-lg">
+                            <div className="text-center text-xl md:text-2xl font-bold text-indigo-600 bg-indigo-100 p-4 rounded-lg">
                                 You scored {score} out of {questions?.length || 0}
                             </div>
                         ) : (
                             questions?.length > 0 && (
-                                <div className="bg-gray-100 p-6 rounded-lg">
-                                    <div className="mb-6">
-                                        <div className="text-lg font-semibold mb-2 text-indigo-600">
+                                <div className="bg-gray-100 p-4 rounded-lg">
+                                    <div className="mb-4">
+                                        <div className="text-base md:text-lg font-semibold mb-2 text-indigo-600">
                                             Question {currentQuestionIndex + 1}/{questions.length}
                                         </div>
                                         {questions[currentQuestionIndex]?.image_url && (
                                             <img 
                                                 src={questions[currentQuestionIndex].image_url} 
                                                 alt="Question" 
-                                                className="w-full max-h-64 object-contain mb-4 rounded-lg"
+                                                className="w-full max-h-48 md:max-h-64 object-contain mb-4 rounded-lg"
                                             />
                                         )}
-                                        <div className="text-xl font-semibold mb-4">
+                                        <div className="text-lg md:text-xl font-semibold mb-4">
                                             {questions[currentQuestionIndex]?.question}
                                         </div>
                                     </div>
-                                    <div className="space-y-3 mb-6">
+                                    <div className="space-y-2 mb-4">
                                         {questions[currentQuestionIndex]?.options.map((option, index) => (
                                             <button
                                                 key={index}
                                                 onClick={() => handleAnswerOptionClick(option)}
-                                                className={`w-full py-3 px-4 rounded-lg font-medium transition duration-300 ${
+                                                className={`w-full py-2 px-3 rounded-lg font-medium text-sm md:text-base transition duration-300 ${
                                                     showingCorrectAnswer
                                                         ? option === questions[currentQuestionIndex].correct_answer
                                                             ? 'bg-green-500 text-white'
@@ -307,11 +306,11 @@ const Quiz = () => {
                                         ))}
                                     </div>
                                     {showingCorrectAnswer && (
-                                        <div className="text-lg font-semibold mb-4 text-green-600 bg-green-100 p-3 rounded-lg">
+                                        <div className="text-base md:text-lg font-semibold mb-4 text-green-600 bg-green-100 p-3 rounded-lg">
                                             Correct Answer: {questions[currentQuestionIndex].correct_answer}
                                         </div>
                                     )}
-                                    <div className="text-lg font-semibold mb-4 text-indigo-600">
+                                    <div className="text-base md:text-lg font-semibold mb-4 text-indigo-600">
                                         Time left: {timeLeft} seconds
                                     </div>
                                 </div>
@@ -319,35 +318,35 @@ const Quiz = () => {
                         )}
                     </div>
 
-                    {/* Right side - Leaderboard and Chat */}
-                    <div className="w-1/2 flex flex-col">
-                        {/* Upper right - Leaderboard */}
-                        <div className="h-1/2 p-6 bg-gray-100 overflow-y-auto">
-                            <h2 className="text-2xl font-semibold mb-4 text-indigo-600">Leaderboard</h2>
+                    {/* Leaderboard and Chat Section */}
+                    <div className="w-full md:w-1/2 flex flex-col">
+                        {/* Leaderboard */}
+                        <div className="h-1/2 p-4 bg-gray-100 overflow-y-auto">
+                            <h2 className="text-xl md:text-2xl font-semibold mb-4 text-indigo-600">Leaderboard</h2>
                             <ul className="space-y-2">
                                 {ratingList
                                     .sort((a, b) => b.rating - a.rating)
                                     .map((rating_item, index) => (
-                                        <li key={index} className="flex justify-between items-center p-3 bg-white rounded-md shadow">
-                                            <span className="font-medium">{rating_item.username}</span>
-                                            <span className="bg-indigo-100 text-indigo-800 py-1 px-3 rounded-full">{rating_item.rating}</span>
+                                        <li key={index} className="flex justify-between items-center p-2 md:p-3 bg-white rounded-md shadow">
+                                            <span className="font-medium text-sm md:text-base">{rating_item.username}</span>
+                                            <span className="bg-indigo-100 text-indigo-800 py-1 px-2 rounded-full text-xs md:text-sm">{rating_item.rating}</span>
                                         </li>
                                     ))}
                             </ul>
                         </div>
 
-                        {/* Lower right - Chat */}
-                        <div className="h-1/2 p-6 bg-white flex flex-col">
-                            <h2 className="text-2xl font-semibold mb-4 text-indigo-600">Chat</h2>
-                            <div className="flex-grow bg-gray-100 rounded-lg p-4 mb-4 overflow-y-auto">
+                        {/* Chat */}
+                        <div className="h-1/2 p-4 bg-white flex flex-col">
+                            <h2 className="text-xl md:text-2xl font-semibold mb-4 text-indigo-600">Chat</h2>
+                            <div className="flex-grow bg-gray-100 rounded-lg p-3 mb-4 overflow-y-auto">
                                 <List>
                                     {messages.map((msg, index) => (
                                         <ListItem key={index} className="mb-2 bg-white rounded-lg shadow-sm">
                                             <ListItemText 
                                                 primary={msg.username} 
                                                 secondary={msg.content}
-                                                primaryTypographyProps={{ className: "font-semibold text-indigo-600" }}
-                                                secondaryTypographyProps={{ className: "text-gray-700" }}
+                                                primaryTypographyProps={{ className: "font-semibold text-indigo-600 text-sm md:text-base" }}
+                                                secondaryTypographyProps={{ className: "text-gray-700 text-xs md:text-sm" }}
                                             />
                                         </ListItem>
                                     ))}
@@ -367,12 +366,14 @@ const Quiz = () => {
                                         }
                                     }}
                                     className="bg-white"
+                                    size="small"
                                 />
                                 <Button
                                     variant="contained"
                                     color="primary"
                                     onClick={handleSendMessage}
                                     className="bg-indigo-600 hover:bg-indigo-700"
+                                    size="small"
                                 >
                                     Send
                                 </Button>
