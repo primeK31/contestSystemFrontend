@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 
 export default function Dashboard() {
+
   const [user, setUser] = useState(null);
   const [stat, setStat] = useState(null);
   const navigate = useNavigate();
+
+  const [comment, setComment] = useState(null);
+  const [isCommentLoading, setIsCommentLoading] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -44,6 +49,22 @@ export default function Dashboard() {
     
     fetchStat();
   }, [user]);
+
+
+  const getAnalytics = async () => {
+    setIsCommentLoading(true);
+    try {
+      const response = await axios.get(`https://contestsystembackend.onrender.com/submissions_comment/${user.username}`);
+      console.log(response.data);
+      setComment(response.data.text);
+    } catch (error) {
+      console.error('Failed to fetch analytics:', error);
+      setComment('Failed to load analytics. Please try again.');
+    } finally {
+      setIsCommentLoading(false);
+    }
+  };
+
 
   const handleLogout = () => {
     localStorage.removeItem('access_token');
@@ -109,6 +130,15 @@ export default function Dashboard() {
                   <span className="absolute text-2xl font-bold text-blue-600">{correctPercentage}%</span>
                 </div>
                 <p className="mt-2 text-sm text-gray-500 text-center">Correct Percentage</p>
+                {isCommentLoading ? (
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg flex justify-center items-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                  </div>
+                ) : comment ? (
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <ReactMarkdown>{comment}</ReactMarkdown>
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
@@ -117,6 +147,15 @@ export default function Dashboard() {
               <p>You haven't made any submissions yet. Start participating in quizzes to see your statistics!</p>
             </div>
           )}
+        </div>
+        <div className="px-4 py-4 sm:px-6 bg-gray-50">
+          <button 
+            onClick={getAnalytics}
+            className="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            disabled={isCommentLoading}
+          >
+            {isCommentLoading ? 'Loading...' : 'Get Analytics'}
+          </button>
         </div>
         <div className="px-4 py-4 sm:px-6 bg-gray-50">
           <button
