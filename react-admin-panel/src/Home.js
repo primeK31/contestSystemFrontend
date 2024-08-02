@@ -124,7 +124,7 @@ function Home() {
                 <path d="M10.4 12.6a2 2 0 1 1 3 3L8 21l-4 1 1-4Z"></path>
               </svg>
               <h3 className="text-xl font-bold text-foreground">Go to the rooms</h3>
-              <p className="text-muted-foreground">Select room and start solving! (You can also create contests and rooms in <a href='/admin'>admin panel page</a>)
+              <p className="text-muted-foreground">Select room and start solving! (You can also create contests and rooms in <a href='/admin' className="underline text-blue-500">admin panel page</a>)
               Login: admin. Password: admin123 (login can take some seconds). If you do AI generated contest, you need to refresh page and login again to admin panel.</p>
             </div>
             <div className="space-y-2">
