@@ -19,6 +19,7 @@ import Heads from './components/Heads';
 import Foots from './components/Foots';
 import Login from './components/Login';
 import Dashboard from './Dashboard';
+import { Analytics } from '@vercel/analytics/react';
 
 
 
