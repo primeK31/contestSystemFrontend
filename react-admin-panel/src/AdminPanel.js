@@ -151,7 +151,7 @@ const AdminPanel = () => {
           <RoomCreatingForm onSelectRoom={handleSelectRoom} />
           <ContestForm />
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">AI Image Upload</h2>
+            <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">AI generate quiz</h2>
             <div
               id="dropzone"
               className={`dropzone p-12 text-center border-3 border-dashed rounded-xl transition-all duration-300 cursor-pointer ${
